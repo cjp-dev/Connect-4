@@ -133,7 +133,7 @@ The engine is described in detail in [docs/brain](docs/brain/README.md).
 
 ## Phase 10 – Documentation and deployment
 
-- The brain documentation in [docs/brain](docs/brain/README.md), also shown by the web app (Brain > How Connect 4 Thinks).
+- Rules and documentation in [docs/brain](docs/brain/README.md), also shown by the web app (Help → Rules & Documentation).
 - This document.
 - A GitHub Actions workflow (`.github/workflows/azure-static-web-apps.yml`) that runs the engine tests, publishes the web app with AOT and deploys it to Azure Static Web Apps on every push to `main` that changes the web app, the shared code, the images or the docs.
 

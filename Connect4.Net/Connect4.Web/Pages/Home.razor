@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @using System.ComponentModel
 @using System.Windows.Input
 @using CommunityToolkit.Mvvm.Input
@@ -123,8 +123,11 @@
                 new("3D Discs", ChangeAppearance(a => a with { Discs3D = !a.Discs3D }), IsChecked: () => _appearance.Discs3D, SeparatorBefore: true),
                 new("Animate Drops", ChangeAppearance(a => a with { AnimateDrops = !a.AnimateDrops }), IsChecked: () => _appearance.AnimateDrops),
             ]),
-            new("Brain", [new("How Connect 4 Thinks", new RelayCommand(OpenDocs))]),
-            new("Help", [new("About Connect 4...", Vm.AboutCommand)]),
+            new("Help",
+            [
+                new("Rules & Documentation", new RelayCommand(OpenDocs)),
+                new("About Connect 4...", Vm.AboutCommand, SeparatorBefore: true),
+            ]),
         ];
         _commands = _menus.SelectMany(menu => menu.Entries).Select(entry => entry.Command).ToArray();
 
@@ -148,6 +151,7 @@
         {
             _self = DotNetObjectReference.Create(this);
             await JS.InvokeVoidAsync("connect4.registerShortcuts", _self);
+            await JS.InvokeVoidAsync("connect4.initMenuAlignment");
         }
     }
 
@@ -169,6 +173,7 @@
         if (_self is not null)
         {
             ((IJSInProcessRuntime)JS).InvokeVoid("connect4.unregisterShortcuts");
+            ((IJSInProcessRuntime)JS).InvokeVoid("connect4.cleanupMenuAlignment");
             _self.Dispose();
         }
     }

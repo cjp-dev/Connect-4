@@ -65,7 +65,7 @@ The time limit can stop the search at any point; the best move of the last finis
 ## How to view these documents
 
 - **On GitHub:** diagrams and formulas are shown directly.
-- **In the web version:** Brain > How Connect 4 Thinks.
+- **In the web version:** Help → Rules & Documentation.
 - **In VS Code:** open the Markdown preview (Ctrl+Shift+V). The diagrams need the extension *Markdown Preview Mermaid Support* (`bierner.markdown-mermaid`).
 
 The diagrams are written in [Mermaid](https://mermaid.js.org/) and the formulas in LaTeX math.
