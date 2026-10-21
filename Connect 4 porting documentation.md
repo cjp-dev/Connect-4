@@ -176,6 +176,17 @@ The engine is described in detail in [docs/brain](docs/brain/README.md).
 
 The book runs showed that the solver is much faster than the first default threshold of 24 empty cells assumed. `Connect4.Tools endgame measure` timed the engine's solve (every move, from an empty table) on positions from engine games and from the test sets: at 24 empty cells 90 % finish within 0.02 s, at 31 within 1.4 s, at 33 within 3.7 s; the time roughly doubles per empty cell. With 5 s per move the solver gets at most 1.7 s, so the default was raised to **30** (31 on the desktop, one less for the slower browser). Details in [docs/brain/09-endgame-solver.md](docs/brain/09-endgame-solver.md#choosing-the-threshold).
 
+---
+
+## Web architecture upgrade (as Stello)
+
+Following Stello and Checkers, Connect-4's web architecture was upgraded across four phases:
+
+- **Phase 1 – Heartbeats during long search and solve iterations:** Added an internal heartbeat hook in `EndgameSolver` (invoked every 1,024 nodes) and a 100 ms heartbeat mechanism in `SearchEngine` so the Web Worker and analysis panel receive regular updates during long search depths and endgame solves without waiting for iteration boundaries.
+- **Phase 2 – Cooperative Web Worker cancellation via SharedArrayBuffer:** Configured `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` headers, enabling `SharedArrayBuffer` signaling (Move Now = 1, Cancel = 2). The worker polls this signal via `Atomics.load` on every report/heartbeat and cancels its tokens cooperatively, keeping the transposition tables allocated. Falls back to worker termination if not cross-origin isolated or unanswered within 300 ms.
+- **Phase 3 – Standalone `AnalysisPanel` component:** Extracted `AnalysisPanel.razor` with `_renderPending` batching via `Task.Yield()` to coalesce rapid property updates into a single render pass, isolating telemetry updates from `Home.razor` and board rendering.
+- **Phase 4 – Mobile layout, touch controls, and thinking bar:** Added `100dvh` viewport sizing, consolidated board sizing into `--board-size: min(100cqh - 2rem, 100cqw - 252px)`, added an animated blue thinking progress bar and touch-friendly quick action buttons (New, Back, Forward, Move Now), wrapped sticky disc hover preview in `@media (hover: hover)`, and added orientation-aware responsive breakpoints.
+
 ## Not done
 
 - **Tools project:** engine-against-engine matches for tuning, a node-rate comparison with the C++ program and a command line like the C++ `main.cpp` are left for later; `Connect4.Tools` makes the opening book and measures the endgame threshold.

@@ -7,14 +7,15 @@ using Connect4.Web.Worker;
 namespace Connect4.Web.Services;
 
 /// <summary>
-/// Runs the engine in a Web Worker so the page stays responsive. A running search cannot be interrupted inside
-/// the worker, so Stop and Move Now terminate it and start a new one (with fresh hash tables).
+/// Runs the engine in a Web Worker so the page stays responsive. A running search is stopped with a signal through
+/// shared memory, which keeps the hash tables; the worker is only restarted when the signal is not available or not answered in time.
 /// </summary>
 public sealed class WebEngineHost : IEngineHost
 {
     // As on the desktop; the engine falls back to 2^20 entries per table when the browser cannot allocate them.
     private const int HashLogSize = 24;
     private const int EndgameLogSize = 24;
+    private const int StopGraceMs = 300;
 
     private readonly IJSRuntime _js;
     private readonly DotNetObjectReference<WebEngineHost> _self;
@@ -59,20 +60,41 @@ public sealed class WebEngineHost : IEngineHost
             {
                 return EngineProtocol.ReadResult(await search);
             }
+
+            bool isMoveNow = await stopped.Task;
+            if (client.Invoke<bool>("signal", isMoveNow ? 1 : 2)
+                && await Task.WhenAny(search, Task.Delay(StopGraceMs)) == search)
+            {
+                if (!isMoveNow)
+                {
+                    Forget(search);
+                    throw new OperationCanceledException(cancellationToken);
+                }
+
+                try
+                {
+                    // The engine's own result: the best move of the last finished iteration (or the solver's).
+                    return EngineProtocol.ReadResult(await search);
+                }
+                catch (JSException)
+                {
+                    // The worker failed; restart it below.
+                }
+            }
+
+            Forget(search);
+            Restart(client);
+            if (!isMoveNow)
+            {
+                throw new OperationCanceledException(cancellationToken);
+            }
+
+            return EngineProtocol.MoveNowResult(moves, last, clock.Elapsed);
         }
         finally
         {
             _progress = null;
         }
-
-        Forget(search);
-        Restart(client);
-        if (!await stopped.Task)
-        {
-            throw new OperationCanceledException(cancellationToken);
-        }
-
-        return EngineProtocol.MoveNowResult(moves, last, clock.Elapsed);
     }
 
     public void NewGame()

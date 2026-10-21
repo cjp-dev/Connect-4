@@ -72,7 +72,7 @@ It is created the first time the solver runs and kept for the whole session: its
 
 The heuristic search runs first. In fixed-depth mode it is then limited to 8 plies, because it only has to give a move in case Move Now stops the solver. The solver is skipped when the heuristic search has already found a final result.
 
-If the solver runs out of time or Move Now is pressed, it throws `OperationCanceledException`, and the move of the heuristic search is played. The time limit is checked with a clock every 1 024 nodes, not with a timer: in the browser the engine runs in a Web Worker, where a timer cannot fire while the search runs.
+If the solver runs out of time or Move Now is pressed, it throws `OperationCanceledException`, and the move of the heuristic search is played. The time limit is checked with a clock every 1 024 nodes, not with a timer: in the browser the engine runs in a Web Worker, where a timer cannot fire while the search runs. The 1 024-node check also invokes an internal heartbeat hook, allowing the engine to report progress and poll the stop signal at least every 100 ms during long endgame solves.
 
 ## Choosing the threshold
 

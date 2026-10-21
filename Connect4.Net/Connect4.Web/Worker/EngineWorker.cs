@@ -26,7 +26,10 @@ public static partial class EngineWorker
     public static string ChooseMove(string request)
     {
         (Game game, SearchLimits limits) = EngineProtocol.ReadRequest(request);
-        return EngineProtocol.WriteResult(Computer.ChooseMove(game, limits, new ProgressPoster()));
+        using var cancel = new CancellationTokenSource();
+        using var moveNow = new CancellationTokenSource();
+        SearchResult result = Computer.ChooseMove(game, limits, new ProgressPoster(cancel, moveNow), cancel.Token, moveNow.Token);
+        return EngineProtocol.WriteResult(result);
     }
 
     [JSExport]
@@ -35,8 +38,11 @@ public static partial class EngineWorker
     [JSImport("postProgress", "engine-worker")]
     private static partial void PostProgress(string json);
 
+    [JSImport("pollSignal", "engine-worker")]
+    private static partial int PollSignal();
+
     // Posting every report would flood the page; new depths, new best moves and the solver always go through.
-    private sealed class ProgressPoster : IProgress<SearchInfo>
+    private sealed class ProgressPoster(CancellationTokenSource cancel, CancellationTokenSource moveNow) : IProgress<SearchInfo>
     {
         private const long IntervalMs = 100;
 
@@ -48,6 +54,16 @@ public static partial class EngineWorker
 
         public void Report(SearchInfo info)
         {
+            switch (PollSignal())
+            {
+                case 2:
+                    cancel.Cancel();
+                    return;
+                case 1:
+                    moveNow.Cancel();
+                    return;
+            }
+
             long now = _clock.ElapsedMilliseconds;
             if (info.Depth == _lastDepth && info.BestColumn == _lastBest && info.Solving == _lastSolving
                 && now - _lastPostMs < IntervalMs)

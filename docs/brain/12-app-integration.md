@@ -47,7 +47,7 @@ When the mode is changed during a game, the human keeps the side to move and the
 `IEngineHost.ChooseMoveAsync(moves, limits, progress, cancel, moveNow)` gets the game as a list of columns, so the engine gets its own copy.
 
 - **Desktop:** `LocalEngineHost` rebuilds the game and runs `ComputerPlayer.ChooseMove` on a thread-pool thread. `Progress<SearchInfo>` brings the reports back to the UI thread.
-- **Browser:** `WebEngineHost` sends the request as JSON to a **Web Worker** that runs its own .NET runtime with the engine (`Worker/EngineWorker.cs`, `wwwroot/js/engine-worker.js`). Progress reports come back as messages, at most one per 100 ms unless the depth, the best move or the solver state changes. A running search cannot be interrupted inside the worker, so Move Now and Stop terminate the worker and start a new one; Move Now plays the best move reported so far. The new worker starts with empty hash tables.
+- **Browser:** `WebEngineHost` sends the request as JSON to a **Web Worker** that runs its own .NET runtime with the engine (`Worker/EngineWorker.cs`, `wwwroot/js/engine-worker.js`). Progress reports come back as messages, at most one per 100 ms unless the depth, the best move or the solver state changes (and at least every 100 ms via heartbeats). Move Now and Stop send a signal through shared memory (`SharedArrayBuffer`), which the worker checks at each progress report and cancels the search cooperatively, keeping the hash tables. Only when the signal is unavailable (not cross-origin isolated) or unanswered within 300 ms is the worker terminated and restarted.
 
 In both, `NewGame()` clears the search hash table.
 
@@ -70,12 +70,12 @@ sequenceDiagram
     W-->>JS: result JSON
     JS-->>Host: the call returns
     Host-->>VM: SearchResult
-    Note over VM,W: Move Now or Stop: the host terminates the worker and starts a new one.<br/>Move Now returns the best move reported so far.
+    Note over VM,W: Move Now or Stop: signal via SharedArrayBuffer stops the worker cooperatively;<br/>fallback terminates and restarts if not answered within 300 ms.
 ```
 
 ## The analysis panel
 
-`AnalysisViewModel` shows the progress and the result: the move searched, the depth ("12 plies", "solving (20 empty)", or "book" for a move from the opening book), the value, the best move, the expected line, the nodes and the time. Columns are shown 1–7. The value is shown from **Red's view**: "+25" is good for Red. Decided scores are shown as "Red wins in 3 moves" (counting the winner's moves) or "Draw".
+`AnalysisViewModel` shows the progress and the result: the move searched, the depth ("12 plies", "solving (20 empty)", or "book" for a move from the opening book), the value, the best move, the expected line, the nodes and the time. Columns are shown 1–7. The value is shown from **Red's view**: "+25" is good for Red. Decided scores are shown as "Red wins in 3 moves" (counting the winner's moves) or "Draw". During long search iterations and endgame solves, heartbeats ensure progress reports continue arriving at least every 100 ms so elapsed time and nodes update smoothly.
 
 ## The board
 

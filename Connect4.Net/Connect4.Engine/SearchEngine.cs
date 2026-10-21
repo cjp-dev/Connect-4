@@ -36,6 +36,16 @@ public sealed class SearchEngine
     private CancellationToken _cancel;
     private CancellationToken _moveNow;
     private IProgress<SearchInfo>? _progress;
+    // What the last report said; a heartbeat repeats it with new node and time counts (Stello design).
+    private const long HeartbeatMs = 100;
+    private long _lastReportMs;
+    private Position _reportPosition;
+    private int _reportDepth;
+    private int _reportColumn = -1;
+    private int _reportBest;
+    private int _reportScore;
+    private ScoreKind _reportKind;
+    private bool _reportSolving;
 
     /// <param name="hashLogSize">The search hash table has 2^hashLogSize entries of 8 bytes (24 = 128 MiB).</param>
     /// <param name="endgameLogSize">Size of the endgame solver's table (24 ≈ 84 MB); allocated the first time the solver runs.</param>
@@ -85,6 +95,9 @@ public sealed class SearchEngine
 
         cancellationToken.ThrowIfCancellationRequested();
         _clock.Restart();
+        _lastReportMs = 0;
+        _reportColumn = -1;
+        _reportPosition = position;
         _nodes = 0;
         _cancel = cancellationToken;
         _moveNow = moveNowToken;
@@ -139,7 +152,7 @@ public sealed class SearchEngine
         {
             for (int depth = 1; ; depth++)
             {
-                best = SearchRoot(position, depth, root);
+                best = SearchRoot(position, depth, root, best);
                 if (best.Final || depth >= maxDepth || (timed && _clock.ElapsedMilliseconds > budget.SoftMs))
                 {
                     break;
@@ -159,13 +172,19 @@ public sealed class SearchEngine
         return Result(position, best);
     }
 
-    private Best SearchRoot(Position position, int depth, int[] root)
+    private Best SearchRoot(Position position, int depth, int[] root, Best previous)
     {
         int bestScore = -Infinity;
         var ties = new List<int>(root.Length);
 
         foreach (int column in root)
         {
+            _reportDepth = depth;
+            _reportColumn = column;
+            _reportBest = ties.Count > 0 ? ties[0] : previous.Columns[0];
+            _reportScore = ties.Count > 0 ? bestScore : previous.Score;
+            _reportKind = ties.Count > 0 ? Kind(bestScore) : previous.Kind;
+            _reportSolving = false;
             Position child = position.Play(column);
             int score;
             if (ties.Count == 0)
@@ -331,7 +350,14 @@ public sealed class SearchEngine
         using var source = CancellationTokenSource.CreateLinkedTokenSource(_cancel, _moveNow);
         TimeSpan? timeLimit = timed ? TimeSpan.FromMilliseconds(Math.Max(0, _hardLimitMs - _clock.ElapsedMilliseconds)) : null;
 
+        _reportDepth = position.EmptyCells;
+        _reportColumn = heuristic.Columns[0];
+        _reportBest = heuristic.Columns[0];
+        _reportScore = heuristic.Score;
+        _reportKind = heuristic.Kind;
+        _reportSolving = true;
         long nodesBefore = _endgame.NodeCount;
+        _endgame.Heartbeat = () => Heartbeat(_nodes + _endgame.NodeCount - nodesBefore);
         try
         {
             int[] scores = _endgame.Analyze(position, cancellation: source.Token, timeLimit: timeLimit);
@@ -346,6 +372,7 @@ public sealed class SearchEngine
         }
         finally
         {
+            _endgame.Heartbeat = null;
             _nodes += _endgame.NodeCount - nodesBefore;
         }
     }
@@ -406,11 +433,25 @@ public sealed class SearchEngine
 
     private void CheckAbort()
     {
+        Heartbeat(_nodes);
         _cancel.ThrowIfCancellationRequested();
         if (_moveNow.IsCancellationRequested || _clock.ElapsedMilliseconds >= _hardLimitMs)
         {
             throw new SearchAbortedException();
         }
+    }
+
+    private void Heartbeat(long nodes)
+    {
+        if (_progress is null || _reportColumn < 0 || _clock.ElapsedMilliseconds - _lastReportMs < HeartbeatMs)
+        {
+            return;
+        }
+
+        _lastReportMs = _clock.ElapsedMilliseconds;
+        _progress.Report(new SearchInfo(
+            _reportDepth, _reportColumn, _reportBest, _reportScore, _reportKind, nodes, _clock.Elapsed,
+            PrincipalVariation(_reportPosition, _reportBest), _reportSolving));
     }
 
     private void Report(int depth, int column, int bestColumn, int score, ScoreKind kind, Position position, bool solving)
@@ -420,6 +461,7 @@ public sealed class SearchEngine
             return;
         }
 
+        _lastReportMs = _clock.ElapsedMilliseconds;
         _progress.Report(new SearchInfo(
             depth, column, bestColumn, score, kind, _nodes, _clock.Elapsed, PrincipalVariation(position, bestColumn), solving));
     }

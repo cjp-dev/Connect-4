@@ -343,10 +343,85 @@ public class SearchEngineTests
         }
     }
 
+    [Fact]
+    public async Task Search_WithMoveNow_ReportsHeartbeatsAndReturnsLegalMove()
+    {
+        using var moveNow = new CancellationTokenSource();
+        var progress = new ListProgress();
+        var engine = NewEngine();
+        Position position = Position.FromMoves("443344");
+
+        Task<SearchResult> search = Task.Run(() =>
+            engine.Search(position, SearchLimits.FixedDepth(40), progress, moveNowToken: moveNow.Token));
+
+        await Task.Delay(350);
+        await moveNow.CancelAsync();
+        SearchResult result = await search;
+
+        Assert.True(progress.Items.Count >= 3, $"Expected at least 3 reports, got {progress.Items.Count}");
+        Assert.True(position.CanPlay(result.Column));
+    }
+
+    [Fact]
+    public void Solve_ReportsHeartbeats()
+    {
+        var progress = new ListProgress();
+        var engine = NewEngine();
+        Position position = Position.FromMoves("32751571231557");
+
+        SearchResult result = engine.Search(position, SearchLimits.Solve, progress);
+
+        List<SearchInfo> reports = progress.Items.Where(i => i.Solving).ToList();
+        Assert.True(reports.Count > 1, $"Expected more than 1 solving report, got {reports.Count}");
+        for (int i = 1; i < reports.Count; i++)
+        {
+            Assert.True(reports[i].Nodes >= reports[i - 1].Nodes);
+        }
+        Assert.True(reports[^1].Nodes > reports[0].Nodes);
+        Assert.Equal(ScoreKind.Exact, result.Kind);
+    }
+
+    [Fact]
+    public async Task Solve_WithMoveNow_ReturnsHeuristicMove()
+    {
+        using var moveNow = new CancellationTokenSource();
+        var progress = new ListProgress();
+        var engine = NewEngine();
+        Position position = Position.FromMoves("32751571231557");
+
+        Task<SearchResult> search = Task.Run(() =>
+            engine.Search(position, SearchLimits.Solve, progress, moveNowToken: moveNow.Token));
+
+        await Task.Delay(200);
+        await moveNow.CancelAsync();
+        SearchResult result = await search;
+
+        Assert.True(result.Kind != ScoreKind.Exact);
+        Assert.True(position.CanPlay(result.Column));
+    }
+
     private sealed class ListProgress : IProgress<SearchInfo>
     {
-        public List<SearchInfo> Items { get; } = [];
+        private readonly object _gate = new();
+        private readonly List<SearchInfo> _items = [];
 
-        public void Report(SearchInfo value) => Items.Add(value);
+        public List<SearchInfo> Items
+        {
+            get
+            {
+                lock (_gate)
+                {
+                    return [.. _items];
+                }
+            }
+        }
+
+        public void Report(SearchInfo value)
+        {
+            lock (_gate)
+            {
+                _items.Add(value);
+            }
+        }
     }
 }

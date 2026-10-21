@@ -31,6 +31,9 @@ public sealed class EndgameSolver
     /// <summary>Positions searched since the last <see cref="Reset"/>.</summary>
     public long NodeCount { get; private set; }
 
+    /// <summary>Called every 1 024 nodes, before the token is checked (progress and stop signals in the browser).</summary>
+    internal Action? Heartbeat { get; set; }
+
     public void Reset()
     {
         NodeCount = 0;
@@ -131,6 +134,7 @@ public sealed class EndgameSolver
         NodeCount++;
         if ((NodeCount & CancellationCheckMask) == 0)
         {
+            Heartbeat?.Invoke();
             _cancellation.ThrowIfCancellationRequested();
             if (Stopwatch.GetTimestamp() >= _deadline)
             {
