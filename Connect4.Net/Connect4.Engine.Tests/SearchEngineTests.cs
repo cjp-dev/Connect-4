@@ -349,12 +349,16 @@ public class SearchEngineTests
         using var moveNow = new CancellationTokenSource();
         var progress = new ListProgress();
         var engine = NewEngine();
-        Position position = Position.FromMoves("443344");
+        Position position = Position.Empty;
 
         Task<SearchResult> search = Task.Run(() =>
             engine.Search(position, SearchLimits.FixedDepth(40), progress, moveNowToken: moveNow.Token));
 
-        await Task.Delay(350);
+        while (!search.IsCompleted && !progress.Items.GroupBy(i => (i.Depth, i.Column)).Any(g => g.Count() > 1 && g.Last().Nodes > g.First().Nodes))
+        {
+            await Task.Delay(20);
+        }
+
         await moveNow.CancelAsync();
         SearchResult result = await search;
 
