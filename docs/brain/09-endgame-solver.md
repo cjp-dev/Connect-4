@@ -125,3 +125,7 @@ About 12 million positions per second on the desktop. Solving from the beginning
 | `Test_L1_R1`, `Test_L1_R2`, `Test_L1_R3` (beginning) | 1 000 each | Slow tests only |
 
 Slow tests are run on purpose with `dotnet test Connect4.Engine.Tests -c Release -s Connect4.Engine.Tests/slow.runsettings`; `Test_L1_R3` alone takes about 40 minutes. Also tested: weak solves, `Analyze`, cancellation and the time limit, and the hash table.
+
+---
+
+Previous: [08 Transposition table](08-transposition-table.md) · Next: [10 Time control](10-time-control.md)

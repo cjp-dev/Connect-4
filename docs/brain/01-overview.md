@@ -57,7 +57,7 @@ flowchart LR
 
 ## The life of one computer move
 
-1. The human drops a disc; `MainViewModel` plays it and starts the computer (chapter 12).
+1. When it is the computer's turn—either immediately at match start (when the computer plays Red in Computer vs Human) or after the human drops a disc—`MainViewModel` starts the computer (chapter 12).
 2. The view model asks the `IEngineHost` for a move with the game's moves and the `SearchLimits` from the settings. On the desktop the engine runs on a thread-pool thread; in the browser in a Web Worker.
 3. `ComputerPlayer.ChooseMove` checks that the game is not over and calls `SearchEngine.Search`.
 4. In the first 9 plies `Search` plays the best move from the opening book at once (chapter 11).
@@ -73,3 +73,7 @@ flowchart LR
 - **No allocations in the search.** Move lists are `MoveSorter` structs on the stack.
 - **Repeatable.** For the same position, limits, hash table contents and random seed the result is always the same; the tests seed the random generator.
 - **Tested against independent code.** The bitboards are checked against a slow grid board (`ReferenceBoard` in the tests), the solver against Pascal Pons' test positions with known exact scores.
+
+---
+
+Next: [02 Board and bitboard](02-board-and-bitboard.md)

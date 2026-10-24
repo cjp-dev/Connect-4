@@ -88,3 +88,7 @@ A test keeps the agreement above 70 % for two of the sets, so a change of the we
 ## How it is tested
 
 [EvaluatorTests.cs](../../Connect4.Net/Connect4.Engine.Tests/EvaluatorTests.cs) checks the 69 lines and the centre table, each term on its own (the difference with and without the term), the symmetries on random positions, the clamping, and the agreement above.
+
+---
+
+Previous: [04 Game record](04-game-record.md) · Next: [06 Move ordering](06-move-ordering.md)

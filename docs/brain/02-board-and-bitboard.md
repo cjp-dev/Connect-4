@@ -88,3 +88,7 @@ The C++ code also has a mirror-symmetric base-3 key (`key3`) for its opening boo
 ## Text
 
 `Position.ToString()` gives six lines, top row first, with `R`, `Y` and `.`; `Position.FromMoves("4453")` builds a position from 1-based columns (chapter 04).
+
+---
+
+Previous: [01 Overview](01-overview.md) · Next: [03 Rules and move generation](03-rules-and-move-generation.md)

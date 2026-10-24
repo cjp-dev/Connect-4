@@ -35,12 +35,23 @@ flowchart TD
 
 Commands that change the game (New Game, Open, Undo, Redo, Switch Sides, changing the mode) first cancel a running search and wait until it has stopped.
 
-| Mode | Who plays | Undo / Redo | Switch Sides |
-|---|---|---|---|
-| Human vs Computer (default, human is Red) | The human one colour, the computer the other | Back or forward to the human's previous or next turn | The human takes the computer's colour |
-| Human vs Human | Both colours by hand | One move | Disabled |
+| Mode | Who plays | First move | Undo / Redo | Switch Sides |
+|---|---|---|---|---|
+| vs Computer (Red) (`HumanVsComputer`) | Human plays Red, Computer plays Yellow | Human | 2 plies (back to human's turn) | Human swaps to Yellow |
+| vs Computer (Yellow) (`ComputerVsHuman`) | Computer plays Red, Human plays Yellow | Computer (opens at once) | 2 plies (back to human's turn) | Human swaps to Red |
+| vs Human (`HumanVsHuman`) | Two players share the board locally | Player 1 (Red) | 1 ply | Disabled |
 
-When the mode is changed during a game, the human keeps the side to move and the computer takes the other colour. In Human vs Human the analysis panel stays empty.
+When starting a new game or changing modes while a match is underway, `MainViewModel` asks the user for confirmation via `IDialogService.ConfirmAsync` to prevent accidental loss of game progress.
+
+In single-player modes vs the computer, taking back moves, swapping sides mid-game, editing settings during play, or continuing after clock expiration sets `IsGameModified = true`, turning the UI `STATUS` label crimson red (`#E74C3C`) to indicate that competitive match integrity has been altered (chapter 13). In Human vs Human the analysis panel stays empty.
+
+## Chess clocks and timeout continuation
+
+When **Time per Game** is configured (chapter 10), `MainViewModel` initializes chess clocks for both players and drives a $250\text{ ms}$ ticking timer for the active player's clock bank once the first move is made:
+
+- **Time refunds on Undo:** Time consumed during undone plies is tracked per ply and refunded back to the player's clock when `Undo` is clicked.
+- **Computer timeout:** If the computer runs out of time, the match concludes immediately with a human victory on time (*"Game over, you won on time."*).
+- **Human timeout continuation:** If the human player's clock expires (`0:00`), a dialog prompts: *"You ran out of time! Do you want to continue playing?"*. If the player agrees, the clock freezes at `0:00`, the match continues casually, and `IsGameModified` is flagged.
 
 ## The engine host
 
@@ -75,7 +86,7 @@ sequenceDiagram
 
 ## The analysis panel
 
-`AnalysisViewModel` shows the progress and the result: the move searched, the depth ("12 plies", "solving (20 empty)", or "book" for a move from the opening book), the value, the best move, the expected line, the nodes and the time. Columns are shown 1–7. The value is shown from **Red's view**: "+25" is good for Red. Decided scores are shown as "Red wins in 3 moves" (counting the winner's moves) or "Draw". During long search iterations and endgame solves, heartbeats ensure progress reports continue arriving at least every 100 ms so elapsed time and nodes update smoothly.
+`AnalysisViewModel` formats the engine search progress and results across 7 distinct telemetry properties: `Move` (current candidate evaluated), `Depth` (search plies, endgame solve status, or opening book), `Score` (heuristic score or proven win distance from Red's view), `BestMove` (current principal candidate column), `Nodes` (total visited states), `Speed` (throughput in nodes per second, `nps`), and `Time` (elapsed stopwatch). It raises an `Updated` event so view components re-render immediately. During long search iterations and endgame solves, heartbeats ensure progress reports continue arriving at least every 100 ms so elapsed time and nodes update smoothly. See chapter 13 for the visual panel layout and telemetry formatting rules.
 
 ## The board
 

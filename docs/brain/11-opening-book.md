@@ -116,3 +116,7 @@ A position with 9 discs has a score in the book but no move, so the normal searc
 
 - [OpeningBookTests.cs](../../Connect4.Net/Connect4.Engine.Tests/OpeningBookTests.cs): `Mirror` and `CanonicalKey`; the number of positions per ply; the back-up compared with a plain negamax over a fake solver; the fastest win; the file format; lookups of mirror images; best moves and random ties.
 - [BuiltInBookTests.cs](../../Connect4.Net/Connect4.Engine.Tests/BuiltInBookTests.cs): the built-in book has 399 029 positions, the known first-move scores, a consistent back-up, and the same scores as every position with at most 9 moves in Pascal Pons' test sets `Test_L1_R1`–`R3`; the search plays the centre from the book at once, picks among equal book moves at random, and searches when the book is off or the position is deeper. A slow test solves 50 random leaves again.
+
+---
+
+Previous: [10 Time control](10-time-control.md) · Next: [12 App integration](12-app-integration.md)

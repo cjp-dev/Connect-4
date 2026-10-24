@@ -91,3 +91,7 @@ Counting all move sequences of a given length (a win ends the sequence) checks t
 ## How it is tested
 
 [PositionTests.cs](../../Connect4.Net/Connect4.Engine.Tests/PositionTests.cs) plays 1 500 random games and compares every position with `ReferenceBoard`, a slow grid board without bit tricks: the cells, the playable columns, the winning moves, the threats of both players and the non-losing moves. [PerftTests.cs](../../Connect4.Net/Connect4.Engine.Tests/PerftTests.cs) checks the counts above. All 6 000 test positions of Pascal Pons are played with `FromMoves`.
+
+---
+
+Previous: [02 Board and bitboard](02-board-and-bitboard.md) · Next: [04 Game record](04-game-record.md)

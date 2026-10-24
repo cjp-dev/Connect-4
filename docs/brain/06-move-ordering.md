@@ -40,3 +40,7 @@ The C++ comment says `3, 4, 2, 5, 1, 6, 0`, but its formula `WIDTH/2 + (1 - 2*(i
 - In the endgame solver, without a hash move, exactly as in C++ (chapter 09).
 
 Only non-losing moves (chapter 03) are ordered, so a move that lets the opponent win at once is never searched.
+
+---
+
+Previous: [05 Evaluation](05-evaluation.md) · Next: [07 Search](07-search.md)

@@ -29,7 +29,7 @@ How long the computer may think is set in the Settings dialog, with the same thr
 | Time per game | $\max(10\ \text{ms}, \text{remaining} / \max(1, \lfloor(\text{empty} + 1) / 2\rfloor))$ | 2/3 of it | All of it |
 | Fixed depth, Solve | — | None | None |
 
-In time-per-game mode the computer makes at most half of the remaining moves, so the time left is shared evenly over them. When the clock is used up, every move still gets 10 ms. The app keeps the computer's clock and gives the time back when moves are taken back (chapter 12).
+In time-per-game mode the computer makes at most half of the remaining moves, so the time left is shared evenly over them. When the clock is used up, every move still gets 10 ms. The app maintains real-time ticking chess clocks for both players (counting down every 250 ms during a turn) and refunds consumed time when moves are taken back with Undo (chapters 12 and 13). If a human player's clock reaches 0:00, a timeout continuation prompt allows casual play to continue.
 
 - After each depth the search stops if the soft limit has passed, because the next depth would take longer than the time left.
 - The hard limit is checked every 1 024 nodes. When it is reached, the running depth is abandoned and the result of the last finished depth is used.
@@ -61,7 +61,11 @@ The depth that is running at the soft limit may finish or be abandoned at the ha
 
 | Token | Effect |
 |---|---|
-| `moveNowToken` | Stop and return the best move found so far (Game > Move Now, Ctrl+M) |
+| `moveNowToken` | Stop and return the best move found so far (Quick Action button, Ctrl+M, Game > Move Now) |
 | `cancellationToken` | Stop and throw `OperationCanceledException` (New Game, Undo, Open, changing the mode, closing the window) |
 
 Both are checked with the hard limit every 1 024 nodes. In the browser the worker reads a stop signal from shared memory at each progress report (at least every 100 ms) and cancels the tokens itself; only if the page is not cross-origin isolated, or the worker does not answer within 300 ms, is the worker terminated (chapter 12).
+
+---
+
+Previous: [09 Endgame solver](09-endgame-solver.md) · Next: [11 Opening book](11-opening-book.md)

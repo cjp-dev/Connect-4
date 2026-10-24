@@ -97,7 +97,7 @@ This costs a little time at the root only. After each iteration the best moves a
 
 ## Progress
 
-After each root move a `SearchInfo` is reported: depth, the move just searched, the best move, the score, the nodes, the time, the principal variation, and whether the endgame solver is running. The app shows it in the analysis panel (chapter 12).
+After each root move a `SearchInfo` is reported: depth, the move just searched, the best move, the score, the nodes, the time, the principal variation, and whether the endgame solver is running. The app streams this data in real time to the analysis panel across seven telemetry indicators (chapters 12 and 13).
 
 ## Speed
 
@@ -106,3 +106,7 @@ About 6–7 million positions per second on the desktop, and about the same in t
 ## How it is tested
 
 [SearchEngineTests.cs](../../Connect4.Net/Connect4.Engine.Tests/SearchEngineTests.cs): winning at once, blocking, a double threat; exact scores and optimal moves (checked with the solver) when the search reaches the end; a win two moves ahead at depth 4; the same seed gives the same moves; equal mirror moves are picked at random; time limits, Move Now, cancellation, the endgame threshold and progress reports; and games against a random player (always won) and a greedy player (at least 9 of 10 won, none lost).
+
+---
+
+Previous: [06 Move ordering](06-move-ordering.md) · Next: [08 Transposition table](08-transposition-table.md)

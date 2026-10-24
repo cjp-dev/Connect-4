@@ -69,3 +69,7 @@ Each slot holds one entry. A new entry replaces the old one, except when the old
 ## How it is tested
 
 [TranspositionTableTests.cs](../../Connect4.Net/Connect4.Engine.Tests/TranspositionTableTests.cs): store and look up, misses, negative and win scores, no false hits for 65 536 keys, the replacement rules, and the size limits.
+
+---
+
+Previous: [07 Search](07-search.md) · Next: [09 Endgame solver](09-endgame-solver.md)

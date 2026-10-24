@@ -22,7 +22,7 @@
 
 When a move wins, `Play` stores the mover as the winner and uses `Position.FindFours` for the winning line. The position after a winning move contains a four, so it must not be searched; the app never asks for a computer move in a finished game.
 
-`Undo` and `Redo` only move `Ply`; the moves after it are kept until a new move is played. The app decides how far to go back: against the computer back to the human's previous turn, in human against human one move (chapter 12).
+`Undo` and `Redo` only move `Ply`; the moves after it are kept until a new move is played. The app decides how far to go back: against the computer back to the human's previous turn (refunding elapsed time to the player's chess clock), in human against human one move (chapters 12 and 13). In casual play vs the computer, taking back a move marks the competitive integrity status as modified (`IsGameModified = true`).
 
 ```text
                  Moves (1-based)    Ply   Position
@@ -42,3 +42,7 @@ Play column 6    4 4 5 3 6          5     after 4 4 5 3 6; the undone 2 is gone
 The apps save games as `.txt` files with this text. It is the same notation as Pascal Pons' solver and test files.
 
 `Position.FromMoves` reads the same notation but refuses a move that makes four in a row, because a `Position` must not contain a four; it is used for positions to search, `Parse` for games.
+
+---
+
+Previous: [03 Rules and move generation](03-rules-and-move-generation.md) · Next: [05 Evaluation](05-evaluation.md)
