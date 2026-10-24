@@ -37,7 +37,7 @@ public sealed class SearchEngine
     private CancellationToken _moveNow;
     private IProgress<SearchInfo>? _progress;
     // What the last report said; a heartbeat repeats it with new node and time counts (Stello design).
-    private const long HeartbeatMs = 100;
+    internal long HeartbeatMs { get; set; } = 100;
     private long _lastReportMs;
     private Position _reportPosition;
     private int _reportDepth;

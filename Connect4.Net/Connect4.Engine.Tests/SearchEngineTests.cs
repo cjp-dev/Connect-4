@@ -9,7 +9,7 @@ public class SearchEngineTests
 {
     // These tests are about the search, so the opening book is left out.
     private static SearchEngine NewEngine(int seed = 1) =>
-        new(hashLogSize: 16, endgameLogSize: EndgameTable.MinLogSize, random: new Random(seed), openingBook: OpeningBook.FromLines([]));
+        new(hashLogSize: 16, endgameLogSize: EndgameTable.MinLogSize, random: new Random(seed), openingBook: OpeningBook.FromLines([])) { HeartbeatMs = 20 };
 
     [Fact]
     public void WinningMove_IsPlayedAtOnce()
@@ -52,6 +52,7 @@ public class SearchEngineTests
     {
         // With at most 8 empty cells the fixed-depth search reaches the end without the solver.
         var engine = NewEngine();
+
         foreach (TestPosition test in TestPosition.Load("Test_L3_R1").Where(t => t.Moves.Length >= 34).Take(100))
         {
             Position position = Position.FromMoves(test.Moves);
@@ -73,6 +74,7 @@ public class SearchEngineTests
     public void FixedDepth_AtLeastTheEmptyCells_UsesTheSolverAndPlaysPerfectly(string file)
     {
         var engine = NewEngine();
+
         foreach (TestPosition test in TestPosition.Load(file).Take(50))
         {
             Position position = Position.FromMoves(test.Moves);
@@ -92,6 +94,7 @@ public class SearchEngineTests
     public void Solve_GivesTheExactScore()
     {
         var engine = NewEngine();
+
         foreach (TestPosition test in TestPosition.Load("Test_L2_R1").Skip(50).Take(50))
         {
             Position position = Position.FromMoves(test.Moves);
@@ -107,6 +110,7 @@ public class SearchEngineTests
     {
         // The side to move wins with its next-but-one disc; it has Moves / 2 discs now.
         var engine = NewEngine();
+
         TestPosition[] quickWins = [.. TestPosition.Load("Test_L3_R1")
             .Where(t => t.Score == EndgameSolver.MaxScore + 4 - (t.Moves.Length / 2 + 2) && HasChoice(t))
             .Take(20)];
@@ -193,7 +197,7 @@ public class SearchEngineTests
 
         SearchResult result = NewEngine().Search(
             position,
-            SearchLimits.TimePerMove(TimeSpan.FromMilliseconds(300)) with { EndgameThreshold = threshold },
+            SearchLimits.TimePerMove(TimeSpan.FromMilliseconds(80)) with { EndgameThreshold = threshold },
             progress);
 
         Assert.Equal(solves, progress.Items.Any(info => info.Solving));
@@ -242,6 +246,7 @@ public class SearchEngineTests
     {
         var random = new Random(5);
         var engine = NewEngine();
+
         for (int game = 0; game < 10; game++)
         {
             Player? winner = PlayGame(engine, engineColour, p => RandomMove(p, random, greedy: false));
@@ -256,6 +261,7 @@ public class SearchEngineTests
     {
         var random = new Random(6);
         var engine = NewEngine();
+
         int wins = 0;
         for (int game = 0; game < 10; game++)
         {
@@ -349,6 +355,7 @@ public class SearchEngineTests
         using var moveNow = new CancellationTokenSource();
         var progress = new ListProgress();
         var engine = NewEngine();
+
         Position position = Position.Empty;
 
         Task<SearchResult> search = Task.Run(() =>
@@ -374,6 +381,7 @@ public class SearchEngineTests
     {
         var progress = new ListProgress();
         var engine = NewEngine();
+
         Position position = Position.FromMoves("16544116424466");
 
         SearchResult result = engine.Search(position, SearchLimits.Solve, progress);
@@ -394,12 +402,16 @@ public class SearchEngineTests
         using var moveNow = new CancellationTokenSource();
         var progress = new ListProgress();
         var engine = NewEngine();
+
         Position position = Position.FromMoves("16544116424466");
 
         Task<SearchResult> search = Task.Run(() =>
             engine.Search(position, SearchLimits.Solve, progress, moveNowToken: moveNow.Token));
 
-        await Task.Delay(200);
+        while (!search.IsCompleted && !progress.Items.Any(i => i.Solving))
+        {
+            await Task.Delay(10);
+        }
         await moveNow.CancelAsync();
         SearchResult result = await search;
 
