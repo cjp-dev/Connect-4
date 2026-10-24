@@ -429,4 +429,75 @@ public sealed class MainViewModelTests
             }
         }
     }
+
+    [Fact]
+    public async Task ComputerVsHuman_ComputerPlaysFirst()
+    {
+        MainViewModel vm = Create(GameMode.ComputerVsHuman);
+        Assert.True(vm.IsComputerVsHuman);
+        Assert.True(vm.IsVsComputer);
+        Assert.Equal(Player.Yellow, vm.Human);
+
+        await vm.Idle;
+
+        Assert.Equal(1, vm.Game.Ply);
+        Assert.Equal("Your move.", vm.Status);
+        Assert.Equal(Player.Yellow, vm.NextDisc);
+        Assert.Equal(1, vm.RedDiscsCount);
+        Assert.Equal(20, vm.RedDiscsLeft);
+        Assert.Equal(0, vm.YellowDiscsCount);
+        Assert.Equal(21, vm.YellowDiscsLeft);
+    }
+
+    [Fact]
+    public async Task Undo_InVsComputer_MarksGameModified()
+    {
+        MainViewModel vm = Create();
+        Assert.False(vm.IsGameModified);
+        Assert.False(vm.IsStatusModified);
+
+        vm.PlayCommand.Execute(3);
+        await vm.Idle;
+
+        Assert.Equal(2, vm.Game.Ply);
+        Assert.False(vm.IsGameModified);
+
+        await vm.UndoCommand.ExecuteAsync(null);
+
+        Assert.Equal(0, vm.Game.Ply);
+        Assert.True(vm.IsGameModified);
+        Assert.True(vm.IsStatusModified);
+    }
+
+    [Fact]
+    public async Task SwitchSides_MarksGameModified()
+    {
+        MainViewModel vm = Create();
+        Assert.False(vm.IsGameModified);
+
+        await vm.SwitchSidesCommand.ExecuteAsync(null);
+
+        Assert.True(vm.IsGameModified);
+        Assert.True(vm.IsStatusModified);
+        Assert.Equal(Player.Yellow, vm.Human);
+        Assert.True(vm.IsComputerVsHuman);
+    }
+
+    [Fact]
+    public async Task MoveHistory_UpdatesOnMoves()
+    {
+        MainViewModel vm = Create();
+        Assert.Empty(vm.MoveHistoryList);
+        Assert.Equal("0 moves", vm.MoveCountText);
+
+        vm.PlayCommand.Execute(3);
+        await vm.Idle;
+
+        Assert.Single(vm.MoveHistoryList);
+        MoveHistoryItem item = vm.MoveHistoryList[0];
+        Assert.Equal(1, item.Round);
+        Assert.Equal("4", item.RedMove);
+        Assert.NotEmpty(item.YellowMove);
+        Assert.Equal("1 move", vm.MoveCountText);
+    }
 }

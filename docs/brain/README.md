@@ -53,6 +53,7 @@ The time limit can stop the search at any point; the best move of the last finis
 | 12 | [App integration](12-app-integration.md) | The game loop, threading, the browser worker, settings |
 | 13 | [Glossary](13-glossary.md) | The terms used in these documents |
 | 14 | [References](14-references.md) | Articles and source code on the internet |
+| 15 | [GUI and settings](15-gui-and-settings.md) | User interface, scoreboard, settings and shortcuts |
 
 ## Reading paths
 

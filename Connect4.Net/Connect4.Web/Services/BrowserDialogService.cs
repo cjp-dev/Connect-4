@@ -23,6 +23,12 @@ public sealed class BrowserDialogService(IJSInProcessRuntime js) : IDialogServic
         return button == 0 ? settings.ToSettings() : null;
     }
 
+    public async Task<bool> ConfirmAsync(string title, string message)
+    {
+        int button = await ShowAsync(new DialogRequest { Title = title, Message = message, Buttons = ["Yes", "No"] });
+        return button == 0;
+    }
+
     public void ShowError(string message) =>
         _ = ShowAsync(new DialogRequest { Title = Caption, Message = message, Buttons = ["OK"] });
 
@@ -86,12 +92,11 @@ public sealed class DialogRequest
 
     public SettingsViewModel? Settings { get; init; }
 
-    /// <summary>The text in the input box; null for dialogs without one.</summary>
     public string? Text { get; set; }
 
     public required IReadOnlyList<string> Buttons { get; init; }
 
-    internal Task<int> Result => _result.Task;
+    public Task<int> Result => _result.Task;
 
-    internal void Complete(int button) => _result.TrySetResult(button);
+    public void Complete(int button) => _result.TrySetResult(button);
 }

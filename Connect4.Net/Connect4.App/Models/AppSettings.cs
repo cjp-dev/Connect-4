@@ -3,6 +3,7 @@ namespace Connect4.App.Models;
 public enum GameMode
 {
     HumanVsComputer,
+    ComputerVsHuman,
     HumanVsHuman,
 }
 

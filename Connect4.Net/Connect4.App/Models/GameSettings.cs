@@ -22,6 +22,17 @@ public sealed record GameSettings(
     [JsonIgnore]
     public TimeSpan GameTime => TimeSpan.FromMinutes(MinutesPerGame);
 
+    [JsonIgnore]
+    public string Summary => Mode switch
+    {
+        TimeControlMode.FixedDepth => $"{Depth} plies",
+        TimeControlMode.TimePerMove => $"{SecondsPerMove}s / move",
+        _ => $"{MinutesPerGame} min / game",
+    };
+
+    [JsonIgnore]
+    public string VariantBadgeText => "Standard";
+
     /// <summary>The same settings with every value in its allowed range.</summary>
     public GameSettings Normalize() => new(
         Mode is TimeControlMode.FixedDepth or TimeControlMode.TimePerMove or TimeControlMode.TimePerGame ? Mode : Default.Mode,

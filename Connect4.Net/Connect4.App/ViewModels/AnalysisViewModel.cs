@@ -7,6 +7,8 @@ namespace Connect4.App.ViewModels;
 /// <summary>The search shown while the computer thinks. Columns are shown 1-based and scores from Red's view.</summary>
 public sealed partial class AnalysisViewModel : ObservableObject
 {
+    public event Action? Updated;
+
     [ObservableProperty]
     private string _move = "";
 
@@ -14,7 +16,7 @@ public sealed partial class AnalysisViewModel : ObservableObject
     private string _depth = "";
 
     [ObservableProperty]
-    private string _value = "";
+    private string _score = "";
 
     [ObservableProperty]
     private string _bestMove = "";
@@ -26,33 +28,46 @@ public sealed partial class AnalysisViewModel : ObservableObject
     private string _nodes = "";
 
     [ObservableProperty]
+    private string _speed = "";
+
+    [ObservableProperty]
     private string _time = "";
+
+    // Backward-compatibility alias
+    public string Value => Score;
 
     public void Clear()
     {
-        Move = Depth = Value = BestMove = Line = Nodes = Time = "";
+        Move = Depth = Score = BestMove = Line = Nodes = Speed = Time = "";
+        Updated?.Invoke();
     }
+
+    public void Reset() => Clear();
 
     /// <param name="position">The position being searched.</param>
     public void Update(SearchInfo info, Position position)
     {
         Move = FormatColumn(info.Column);
         Depth = info.Solving ? $"solving ({info.Depth} empty)" : FormatDepth(info.Depth, info.Kind);
-        Value = FormatScore(info.Score, info.Kind, position);
+        Score = FormatScore(info.Score, info.Kind, position);
         BestMove = info.BestColumn is { } best ? FormatColumn(best) : "";
         Line = FormatLine(info.PrincipalVariation);
         Nodes = info.Nodes.ToString("N0", CultureInfo.CurrentCulture);
+        Speed = FormatSpeed(info.Nodes, info.Elapsed);
         Time = FormatTime(info.Elapsed);
+        Updated?.Invoke();
     }
 
     public void Update(SearchResult result, Position position, TimeSpan elapsed)
     {
         Move = BestMove = FormatColumn(result.Column);
         Depth = result.FromBook ? "book" : FormatDepth(result.Depth, result.Kind);
-        Value = FormatScore(result.Score, result.Kind, position);
+        Score = FormatScore(result.Score, result.Kind, position);
         Line = FormatLine(result.PrincipalVariation);
         Nodes = result.Nodes.ToString("N0", CultureInfo.CurrentCulture);
+        Speed = FormatSpeed(result.Nodes, elapsed);
         Time = FormatTime(elapsed);
+        Updated?.Invoke();
     }
 
     /// <summary>A score for the side to move in <paramref name="position"/>, shown from Red's view.</summary>
@@ -89,4 +104,16 @@ public sealed partial class AnalysisViewModel : ObservableObject
     private static string FormatLine(IReadOnlyList<int> line) => string.Concat(line.Select(FormatColumn));
 
     private static string FormatTime(TimeSpan elapsed) => elapsed.ToString(@"m\:ss\.f", CultureInfo.CurrentCulture);
+
+    private static string FormatSpeed(long nodes, TimeSpan elapsed)
+    {
+        double seconds = elapsed.TotalSeconds;
+        if (seconds <= 0.001 || nodes <= 0)
+        {
+            return "";
+        }
+
+        long nps = (long)(nodes / seconds);
+        return $"{nps.ToString("N0", CultureInfo.CurrentCulture)} nps";
+    }
 }

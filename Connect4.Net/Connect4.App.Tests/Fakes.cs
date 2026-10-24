@@ -8,6 +8,8 @@ internal sealed class FakeDialogService : IDialogService
 {
     public GameSettings? NewSettings { get; set; }
 
+    public bool ConfirmResult { get; set; } = true;
+
     public List<string> Errors { get; } = [];
 
     public int Beeps { get; private set; }
@@ -15,6 +17,8 @@ internal sealed class FakeDialogService : IDialogService
     public int AboutShown { get; private set; }
 
     public Task<GameSettings?> EditSettingsAsync(GameSettings current) => Task.FromResult(NewSettings);
+
+    public Task<bool> ConfirmAsync(string title, string message) => Task.FromResult(ConfirmResult);
 
     public void ShowError(string message) => Errors.Add(message);
 

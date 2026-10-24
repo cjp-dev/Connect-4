@@ -20,6 +20,14 @@ internal sealed class DialogService : IDialogService
         return Task.FromResult(window.ShowDialog() == true ? viewModel.ToSettings() : null);
     }
 
+    public Task<bool> ConfirmAsync(string title, string message)
+    {
+        MessageBoxResult result = Owner is { } owner
+            ? MessageBox.Show(owner, message, title, MessageBoxButton.YesNo, MessageBoxImage.Question)
+            : MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
+        return Task.FromResult(result == MessageBoxResult.Yes);
+    }
+
     public void ShowError(string message)
     {
         if (Owner is { } owner)
