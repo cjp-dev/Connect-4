@@ -243,8 +243,6 @@
             [
                 new("Analysis", Vm.ToggleAnalysisCommand, "Ctrl+A", IsChecked: () => Vm.IsAnalysisVisible),
                 new("Sound", Vm.ToggleSoundCommand, IsChecked: () => Vm.IsSoundOn),
-                new("Undo", Vm.UndoCommand, "Ctrl+Z"),
-                new("Redo", Vm.RedoCommand, "Ctrl+Y"),
                 BoardEntry("Blue Board", BoardStyle.Blue, separatorBefore: true),
                 BoardEntry("Golden Oak Board", BoardStyle.GoldenOak),
                 BoardEntry("Reddish Wood Board", BoardStyle.ReddishWood),
@@ -338,7 +336,7 @@
 
     private void Play(int column) => Vm.PlayCommand.Execute(column);
 
-    private void OpenUserGuide() => ((IJSInProcessRuntime)JS).InvokeVoid("open", BrainDocs.PageRoute("15-gui-and-settings"), "_blank", "noopener");
+    private void OpenUserGuide() => ((IJSInProcessRuntime)JS).InvokeVoid("open", BrainDocs.PageRoute("13-gui-and-settings"), "_blank", "noopener");
 
     private void OpenDocs() => ((IJSInProcessRuntime)JS).InvokeVoid("open", BrainDocs.PageRoute(""), "_blank", "noopener");
 

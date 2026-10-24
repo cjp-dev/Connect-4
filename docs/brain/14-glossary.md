@@ -1,4 +1,4 @@
-# 13 – Glossary
+# 14 – Glossary
 
 [Back to the index](README.md)
 
@@ -42,3 +42,7 @@
 | **Weak solve** | A solve that only finds win, draw or loss (only the sign of the score is exact). |
 | **Web Worker** | A background thread in the browser; the web version runs the engine in one. |
 | **Zugzwang** | Having to move when every move makes the position worse; in Connect 4 it decides which threats can be used. |
+
+---
+
+Previous: [13 GUI and settings](13-gui-and-settings.md) · Next: [15 References](15-references.md)

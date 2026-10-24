@@ -51,9 +51,9 @@ The time limit can stop the search at any point; the best move of the last finis
 | 10 | [Time control](10-time-control.md) | Time modes, soft and hard limits, Move Now |
 | 11 | [Opening book](11-opening-book.md) | The solved first 9 plies, how the book is made and used |
 | 12 | [App integration](12-app-integration.md) | The game loop, threading, the browser worker, settings |
-| 13 | [Glossary](13-glossary.md) | The terms used in these documents |
-| 14 | [References](14-references.md) | Articles and source code on the internet |
-| 15 | [GUI and settings](15-gui-and-settings.md) | User interface, scoreboard, settings and shortcuts |
+| 13 | [GUI and settings](13-gui-and-settings.md) | User interface, scoreboard, settings and shortcuts |
+| 14 | [Glossary](14-glossary.md) | The terms used in these documents |
+| 15 | [References](15-references.md) | Articles and source code on the internet |
 
 ## Reading paths
 
@@ -61,7 +61,7 @@ The time limit can stop the search at any point; the best move of the last finis
 - **Just the search:** 01, 02, 03, 05, 06, 07, 08, 09, 11.
 - **Just the opening book:** 01, 02 (the mirror key), 09, 11.
 - **Tuning the engine:** 05, 06, 07, 09, 10.
-- **Changing the app:** 01, 10, 12.
+- **Changing the app:** 01, 10, 12, 13.
 
 ## How to view these documents
 

@@ -102,3 +102,7 @@ The settings are the time control (chapter 10) with the endgame threshold and "U
 ## Memory
 
 On the desktop the search table takes 128 MiB and the endgame table about 84 MB, the latter only after the solver has run once. The browser uses the same sizes in its worker, and falls back to smaller tables if the browser cannot allocate them.
+
+---
+
+Previous: [11 Opening book](11-opening-book.md) · Next: [13 GUI and settings](13-gui-and-settings.md)
