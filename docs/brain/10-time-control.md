@@ -38,19 +38,12 @@ In time-per-game mode the computer makes at most half of the remaining moves, so
 One move with 5 seconds per move, when few enough cells are empty for the solver:
 
 ```mermaid
-gantt
-    title One move with 5 s per move
-    dateFormat x
-    axisFormat %S s
-    tickInterval 1second
-    section Search
-    Depth 1, 2, 3, ...                 : 0, 3333
-    The last depth is finished          : 3333, 3600
-    section Solver
-    Endgame solver, up to the hard limit : 3600, 5000
-    section Limits
-    Soft limit (2/3)                   : milestone, 3333, 0ms
-    Hard limit                         : milestone, 5000, 0ms
+flowchart LR
+    Start["0.0 s<br/>Move starts"] --> Search["Heuristic Search<br/>Depth 1, 2, 3, ..."]
+    Search --> Soft["3.33 s (Soft limit: 2/3)<br/>No new depth started"]
+    Soft --> LastDepth["Finishing current depth<br/>(e.g. to 3.6 s)"]
+    LastDepth --> Solver["Endgame Solver<br/>(if empty &le; 30)"]
+    Solver --> Hard["5.0 s (Hard limit)<br/>Hard timeout stops search"]
 ```
 
 The depth that is running at the soft limit may finish or be abandoned at the hard limit; the solver gets what is left, at most the last third.

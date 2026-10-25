@@ -18,8 +18,8 @@
 ## This project
 
 - The **Stello** documentation – the Othello program whose search framework, time control and app this project reuses.
-- [Connect 4 porting documentation.md](../../Connect%204%20porting%20documentation.md) – how the C++ code was ported, part by part.
-- [general-game-gui-specification.md](../../general-game-gui-specification.md) – Tournament GUI specification and standards adapted by Connect 4.
+- [Connect 4 porting documentation.md](https://github.com/cjp-dev/Connect-4/blob/main/Plans/Connect%204%20porting%20documentation.md) – how the C++ code was ported, part by part.
+- [general-game-gui-specification.md](https://github.com/cjp-dev/Connect-4/blob/main/Plans/general-game-gui-specification.md) – Tournament GUI specification and standards adapted by Connect 4.
 
 ---
 

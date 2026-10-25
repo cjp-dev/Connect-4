@@ -1,23 +1,32 @@
-﻿<Window x:Class="Connect4.WPF.MainWindow"
+<Window x:Class="Connect4.WPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Connect4.WPF"
         xmlns:models="clr-namespace:Connect4.App.Models;assembly=Connect4.App"
         xmlns:views="clr-namespace:Connect4.WPF.Views"
         xmlns:vm="clr-namespace:Connect4.App.ViewModels;assembly=Connect4.App"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
-        Title="{Binding Title}" Width="820" Height="600" MinWidth="560" MinHeight="420"
-        WindowStartupLocation="CenterScreen">
+        Title="{Binding Title}"
+        Width="980" Height="730"
+        MinWidth="820" MinHeight="620"
+        WindowStartupLocation="CenterScreen"
+        Background="#F4F6F9">
+
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility" />
-        <Style x:Key="Label" TargetType="TextBlock">
-            <Setter Property="Margin" Value="0,2,12,2" />
-            <Setter Property="Foreground" Value="#555" />
+        <Style x:Key="AnalysisLabel" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,2,14,2" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#7F8C8D" />
         </Style>
-        <Style x:Key="Field" TargetType="TextBlock">
+        <Style x:Key="AnalysisField" TargetType="TextBlock">
             <Setter Property="Margin" Value="0,2,0,2" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#2C3E50" />
         </Style>
     </Window.Resources>
 
@@ -32,7 +41,8 @@
     </Window.InputBindings>
 
     <DockPanel>
-        <Menu DockPanel.Dock="Top">
+        <!-- Main Top Menu -->
+        <Menu DockPanel.Dock="Top" Background="#FFFFFF" Padding="4,2">
             <MenuItem Header="_File">
                 <MenuItem Header="_New Game" InputGestureText="Ctrl+N" Command="{Binding NewGameCommand}" />
                 <MenuItem Header="_Open..." InputGestureText="Ctrl+O" Command="{Binding OpenCommand}" />
@@ -42,10 +52,21 @@
                 <MenuItem Header="E_xit" Click="OnExit" />
             </MenuItem>
             <MenuItem Header="_Game">
-                <MenuItem Header="Human vs _Computer" IsChecked="{Binding IsHumanVsComputer, Mode=OneWay}"
-                          Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:GameMode.HumanVsComputer}" />
-                <MenuItem Header="Human vs _Human" IsChecked="{Binding IsHumanVsHuman, Mode=OneWay}"
-                          Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:GameMode.HumanVsHuman}" />
+                <MenuItem Header="vs Computer (_Red)"
+                          IsCheckable="True"
+                          IsChecked="{Binding IsHumanVsComputer, Mode=OneWay}"
+                          Command="{Binding SetModeCommand}"
+                          CommandParameter="{x:Static models:GameMode.HumanVsComputer}" />
+                <MenuItem Header="vs Computer (_Yellow)"
+                          IsCheckable="True"
+                          IsChecked="{Binding IsComputerVsHuman, Mode=OneWay}"
+                          Command="{Binding SetModeCommand}"
+                          CommandParameter="{x:Static models:GameMode.ComputerVsHuman}" />
+                <MenuItem Header="vs _Human (Two players)"
+                          IsCheckable="True"
+                          IsChecked="{Binding IsHumanVsHuman, Mode=OneWay}"
+                          Command="{Binding SetModeCommand}"
+                          CommandParameter="{x:Static models:GameMode.HumanVsHuman}" />
                 <Separator />
                 <MenuItem Header="_Switch Sides" Command="{Binding SwitchSidesCommand}" />
                 <MenuItem Header="_Move Now" InputGestureText="Ctrl+M" Command="{Binding MoveNowCommand}" />
@@ -53,80 +74,267 @@
                 <MenuItem Header="S_ettings..." Command="{Binding EditSettingsCommand}" />
             </MenuItem>
             <MenuItem Header="_Moves">
-                <MenuItem Header="_Back" InputGestureText="Ctrl+Z" Command="{Binding UndoCommand}" />
-                <MenuItem Header="_Forward" InputGestureText="Ctrl+Y" Command="{Binding RedoCommand}" />
+                <MenuItem Header="_Undo" InputGestureText="Ctrl+Z" Command="{Binding UndoCommand}" />
+                <MenuItem Header="_Redo" InputGestureText="Ctrl+Y" Command="{Binding RedoCommand}" />
             </MenuItem>
             <MenuItem Header="_View">
                 <MenuItem Header="_Analysis" InputGestureText="Ctrl+A" IsCheckable="True" IsChecked="{Binding IsAnalysisVisible}" />
-                <MenuItem Header="_Sound" IsCheckable="True" IsChecked="{Binding IsSoundOn}" />
+                <MenuItem Header="_Sound" IsCheckable="True" IsChecked="{Binding IsSoundOn}" Command="{Binding ToggleSoundCommand}" />
             </MenuItem>
             <MenuItem Header="_Help">
+                <MenuItem Header="_User guide" Command="{x:Static local:MainWindow.UserGuideCommand}" InputGestureText="F1" />
+                <MenuItem Header="_Rules &amp; Documentation" Command="{x:Static local:MainWindow.DocumentationCommand}" InputGestureText="Shift+F1" />
                 <MenuItem Header="_About Connect 4..." Command="{Binding AboutCommand}" />
             </MenuItem>
         </Menu>
 
-        <Grid Margin="12">
+        <!-- Main Body -->
+        <Grid Margin="16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="240" />
+                <ColumnDefinition Width="310" />
             </Grid.ColumnDefinitions>
 
-            <views:BoardView Margin="0,0,16,0" />
+            <!-- Board Area with Header Indicators -->
+            <Grid Grid.Column="0" Margin="0,0,16,0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-            <StackPanel Grid.Column="1">
-                <GroupBox Header="Status">
-                    <StackPanel Margin="8">
-                        <TextBlock Style="{StaticResource Field}" Text="{Binding Status}" TextWrapping="Wrap" />
-                        <TextBlock Style="{StaticResource Field}" Text="{Binding SidesText}" />
-                        <TextBlock Text="{Binding ClockText}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock" BasedOn="{StaticResource Field}">
+                <!-- Board Mode & Difficulty Banner -->
+                <Border Grid.Row="0" Margin="0,0,0,12" Padding="12,6" Background="#FFFFFF" CornerRadius="6" HorizontalAlignment="Center">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="6" Direction="270" ShadowDepth="1" Opacity="0.08" />
+                    </Border.Effect>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="RULES: " FontSize="11" FontWeight="Bold" Foreground="#888888" VerticalAlignment="Center" Margin="0,0,4,0" />
+                        <Border Background="#16A085" CornerRadius="4" Padding="8,3" Margin="0,0,10,0">
+                            <TextBlock Text="{Binding VariantBadgeText}" FontSize="11" FontWeight="Bold" Foreground="#FFFFFF" />
+                        </Border>
+
+                        <TextBlock Text="SETTINGS: " FontSize="11" FontWeight="Bold" Foreground="#888888" VerticalAlignment="Center" Margin="0,0,4,0"
+                                   Visibility="{Binding IsGameSettingVisible, Converter={StaticResource BooleanToVisibility}}" />
+                        <Border Background="#2980B9" CornerRadius="4" Padding="8,3" Margin="0,0,8,0"
+                                Visibility="{Binding IsGameSettingVisible, Converter={StaticResource BooleanToVisibility}}">
+                            <TextBlock Text="{Binding SettingsBadgeText}" FontSize="11" FontWeight="Bold" Foreground="#FFFFFF" />
+                        </Border>
+
+                        <Border Background="#8E44AD" CornerRadius="4" Padding="8,3"
+                                Visibility="{Binding IsClockVisible, Converter={StaticResource BooleanToVisibility}}">
+                            <TextBlock Text="{Binding ClockText}" FontSize="11" FontWeight="Bold" Foreground="#FFFFFF" />
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- 7x6 Connect 4 Board -->
+                <views:BoardView Grid.Row="1" />
+            </Grid>
+
+            <!-- Right Sidebar Controls & Information -->
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <!-- Game Status Panel -->
+                    <Border Background="#FFFFFF" CornerRadius="6" Padding="12" Margin="0,0,0,10">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="8" Direction="270" ShadowDepth="2" Opacity="0.08" />
+                        </Border.Effect>
+                        <StackPanel>
+                            <Grid Margin="0,0,0,4">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <TextBlock Text="GAME STATUS" FontSize="11" FontWeight="Bold" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="#888888" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsStatusModified}" Value="True">
+                                                        <Setter Property="Foreground" Value="#E74C3C" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <Border Background="#E74C3C" CornerRadius="3" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center"
+                                            Visibility="{Binding IsStatusModified, Converter={StaticResource BooleanToVisibility}}">
+                                        <TextBlock Text="MODIFIED" FontSize="9" FontWeight="Bold" Foreground="#FFFFFF" />
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Text="{Binding TurnIndicatorText}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="#2C3E50" Margin="0,0,0,2" />
+                            <TextBlock Text="{Binding MoveCountText}" FontSize="11" Foreground="#7F8C8D" />
+                            <!-- AI Thinking Indicator -->
+                            <ProgressBar Height="4" IsIndeterminate="True" Margin="0,8,0,0"
+                                         Foreground="#3498DB"
+                                         Visibility="{Binding IsAiThinking, Converter={StaticResource BooleanToVisibility}}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Dual-Card Scoreboard -->
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Red Score Card -->
+                        <Border Grid.Column="0" Margin="0,0,4,0" CornerRadius="6" Padding="10">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="6" Direction="270" ShadowDepth="1" Opacity="0.06" />
+                            </Border.Effect>
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="BorderBrush" Value="#E0E0E0" />
+                                    <Setter Property="BorderThickness" Value="1.5" />
+                                    <Setter Property="Background" Value="#FFFFFF" />
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ClockText}" Value="">
-                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        <DataTrigger Binding="{Binding IsRedActiveTurn}" Value="True">
+                                            <Setter Property="BorderBrush" Value="#D32F2F" />
+                                            <Setter Property="BorderThickness" Value="2" />
+                                            <Setter Property="Background" Value="#FFF8F8" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </StackPanel>
-                </GroupBox>
+                            </Border.Style>
+                            <StackPanel>
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <Ellipse Width="14" Height="14" Fill="#D32F2F" Stroke="#A82323" StrokeThickness="1" Margin="0,0,5,0" />
+                                        <TextBlock Text="Red" FontWeight="Bold" FontSize="13" Foreground="#333333" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding RedClockText}" FontSize="11" FontWeight="Bold" Foreground="#8E44AD" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                               Visibility="{Binding IsClockVisible, Converter={StaticResource BooleanToVisibility}}" />
+                                </Grid>
+                                <TextBlock Text="{Binding RedPlayerLabel}" FontSize="10" FontWeight="SemiBold" Foreground="#D32F2F" Margin="0,3,0,0" />
+                                <TextBlock Text="{Binding RedDiscsCount}" FontSize="18" FontWeight="Bold" Foreground="#2C3E50" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                                <TextBlock FontSize="11" Foreground="#7F8C8D" HorizontalAlignment="Center">
+                                    <Run Text="{Binding RedDiscsLeft, Mode=OneWay}" FontWeight="SemiBold" /><Run Text=" left" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
 
-                <GroupBox Margin="0,12,0,0" Header="Analysis"
-                          Visibility="{Binding IsAnalysisVisible, Converter={StaticResource BooleanToVisibility}}"
-                          DataContext="{Binding Analysis}">
-                    <Grid Margin="8">
+                        <!-- Yellow Score Card -->
+                        <Border Grid.Column="1" Margin="4,0,0,0" CornerRadius="6" Padding="10">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="6" Direction="270" ShadowDepth="1" Opacity="0.06" />
+                            </Border.Effect>
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="BorderBrush" Value="#E0E0E0" />
+                                    <Setter Property="BorderThickness" Value="1.5" />
+                                    <Setter Property="Background" Value="#FFFFFF" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsYellowActiveTurn}" Value="True">
+                                            <Setter Property="BorderBrush" Value="#F57F17" />
+                                            <Setter Property="BorderThickness" Value="2" />
+                                            <Setter Property="Background" Value="#FFFDE7" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <Ellipse Width="14" Height="14" Fill="#FBC02D" Stroke="#C49000" StrokeThickness="1" Margin="0,0,5,0" />
+                                        <TextBlock Text="Yellow" FontWeight="Bold" FontSize="13" Foreground="#333333" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding YellowClockText}" FontSize="11" FontWeight="Bold" Foreground="#8E44AD" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                               Visibility="{Binding IsClockVisible, Converter={StaticResource BooleanToVisibility}}" />
+                                </Grid>
+                                <TextBlock Text="{Binding YellowPlayerLabel}" FontSize="10" FontWeight="SemiBold" Foreground="#D48806" Margin="0,3,0,0" />
+                                <TextBlock Text="{Binding YellowDiscsCount}" FontSize="18" FontWeight="Bold" Foreground="#2C3E50" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                                <TextBlock FontSize="11" Foreground="#7F8C8D" HorizontalAlignment="Center">
+                                    <Run Text="{Binding YellowDiscsLeft, Mode=OneWay}" FontWeight="SemiBold" /><Run Text=" left" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Quick Action Buttons -->
+                    <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
 
-                        <TextBlock Style="{StaticResource Label}" Text="Move:" />
-                        <TextBlock Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Move}" />
-                        <TextBlock Grid.Row="1" Style="{StaticResource Label}" Text="Depth:" />
-                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Depth}" TextWrapping="Wrap" />
-                        <TextBlock Grid.Row="2" Style="{StaticResource Label}" Text="Value:" />
-                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Value}" TextWrapping="Wrap" />
-                        <TextBlock Grid.Row="3" Style="{StaticResource Label}" Text="Best move:" />
-                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding BestMove}" />
-                        <TextBlock Grid.Row="4" Style="{StaticResource Label}" Text="Line:" />
-                        <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Line}" TextWrapping="Wrap" />
-                        <TextBlock Grid.Row="5" Style="{StaticResource Label}" Text="Nodes:" />
-                        <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Nodes}" />
-                        <TextBlock Grid.Row="6" Style="{StaticResource Label}" Text="Time:" />
-                        <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Time}" />
+                        <Button Grid.Column="0" Content="Undo" Command="{Binding UndoCommand}" IsEnabled="{Binding CanUndo}"
+                                Margin="0,0,3,0" Padding="6,6" Background="#ECEFF1" Foreground="#333333" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand" />
+                        <Button Grid.Column="1" Content="Redo" Command="{Binding RedoCommand}" IsEnabled="{Binding CanRedo}"
+                                Margin="3,0,3,0" Padding="6,6" Background="#ECEFF1" Foreground="#333333" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand" />
+                        <Button Grid.Column="2" Content="Move Now" Command="{Binding MoveNowCommand}" IsEnabled="{Binding IsAiThinking}"
+                                Margin="3,0,0,0" Padding="6,6" Background="#F39C12" Foreground="#FFFFFF" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand"
+                                Visibility="{Binding IsVsComputer, Converter={StaticResource BooleanToVisibility}}" />
                     </Grid>
-                </GroupBox>
-            </StackPanel>
+
+                    <!-- Real-time Analysis Panel -->
+                    <Border Background="#FFFFFF" CornerRadius="6" Padding="12" Margin="0,0,0,10"
+                            Visibility="{Binding ShowAnalysis, Converter={StaticResource BooleanToVisibility}}"
+                            DataContext="{Binding Analysis}">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="8" Direction="270" ShadowDepth="2" Opacity="0.08" />
+                        </Border.Effect>
+                        <StackPanel>
+                            <TextBlock Text="ANALYSIS" FontSize="11" FontWeight="Bold" Foreground="#888888" Margin="0,0,0,8" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource AnalysisLabel}" Text="Move:" />
+                                <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource AnalysisField}" Text="{Binding Move}" />
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource AnalysisLabel}" Text="Depth:" />
+                                <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource AnalysisField}" Text="{Binding Depth}" TextWrapping="Wrap" />
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource AnalysisLabel}" Text="Score:" />
+                                <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource AnalysisField}" Text="{Binding Score}" TextWrapping="Wrap" />
+
+                                <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource AnalysisLabel}" Text="Best move:" />
+                                <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource AnalysisField}" Text="{Binding BestMove}" />
+
+                                <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource AnalysisLabel}" Text="Nodes:" />
+                                <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource AnalysisField}" Text="{Binding Nodes}" />
+
+                                <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource AnalysisLabel}" Text="Speed:" />
+                                <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource AnalysisField}" Text="{Binding Speed}" />
+
+                                <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource AnalysisLabel}" Text="Time:" />
+                                <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource AnalysisField}" Text="{Binding Time}" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Move History Panel -->
+                    <Border Background="#FFFFFF" CornerRadius="6" Padding="12">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="8" Direction="270" ShadowDepth="2" Opacity="0.08" />
+                        </Border.Effect>
+                        <StackPanel>
+                            <TextBlock Text="MOVE HISTORY" FontSize="11" FontWeight="Bold" Foreground="#888888" Margin="0,0,0,6" />
+
+                            <ListBox ItemsSource="{Binding MoveHistoryList}" BorderThickness="0" MaxHeight="150"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Notation}" FontSize="12" FontWeight="Medium" Foreground="#2C3E50" Padding="2,1" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
     </DockPanel>
 </Window>

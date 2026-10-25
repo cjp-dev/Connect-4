@@ -1,5 +1,7 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
+using System.Windows.Input;
 using Connect4.App.Models;
 using Connect4.App.ViewModels;
 
@@ -9,12 +11,49 @@ public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel;
 
+    public static readonly RoutedUICommand UserGuideCommand = new(
+        "User guide", nameof(UserGuideCommand), typeof(MainWindow),
+        new InputGestureCollection { new KeyGesture(Key.F1) });
+
+    public static readonly RoutedUICommand DocumentationCommand = new(
+        "Rules & Documentation", nameof(DocumentationCommand), typeof(MainWindow),
+        new InputGestureCollection { new KeyGesture(Key.F1, ModifierKeys.Shift) });
+
     public MainWindow(MainViewModel viewModel)
     {
         InitializeComponent();
         _viewModel = viewModel;
         DataContext = viewModel;
+
+        CommandBindings.Add(new CommandBinding(UserGuideCommand, OnUserGuideExecuted));
+        CommandBindings.Add(new CommandBinding(DocumentationCommand, OnDocumentationExecuted));
+
         Restore(viewModel.WindowPlacement);
+    }
+
+    private void OnUserGuideExecuted(object sender, ExecutedRoutedEventArgs e)
+    {
+        OpenUrl("https://github.com/cjp-dev/Connect-4/blob/main/docs/brain/13-gui-and-settings.md");
+    }
+
+    private void OnDocumentationExecuted(object sender, ExecutedRoutedEventArgs e)
+    {
+        OpenUrl("https://github.com/cjp-dev/Connect-4/blob/main/docs/brain/README.md");
+    }
+
+    private static void OpenUrl(string url)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch
+        {
+        }
     }
 
     protected override void OnClosing(CancelEventArgs e)

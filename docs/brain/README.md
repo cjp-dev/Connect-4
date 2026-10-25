@@ -8,7 +8,7 @@ Connect 4 is a game for two players on a board with 7 columns and 6 rows. The co
 - **the endgame solver**: the C++ solver, ported 1:1, which finds the exact result near the end of the game;
 - **the opening book**: the exact scores of every position of the first 9 plies, made with the endgame solver by `Connect4.Tools`.
 
-These documents explain how the parts work and how they fit together. They describe the C# code in [Connect4.Net](../../Connect4.Net). How the C++ code was ported, and what was changed, is described in [Connect 4 porting documentation.md](../../Connect%204%20porting%20documentation.md).
+These documents explain how the parts work and how they fit together. They describe the C# code in [Connect4.Net](https://github.com/cjp-dev/Connect-4/tree/main/Connect4.Net). How the C++ code was ported, and what was changed, is described in [Connect 4 porting documentation.md](https://github.com/cjp-dev/Connect-4/blob/main/Plans/Connect%204%20porting%20documentation.md).
 
 ## The brain on one page
 

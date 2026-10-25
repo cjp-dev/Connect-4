@@ -15,8 +15,8 @@ The solution [Connect4.Net.slnx](../../Connect4.Net/Connect4.Net.slnx) has five 
 | `Connect4.WPF` | WPF app (`net10.0-windows`) | The desktop window, dialogs and services |
 | `Connect4.Web` | Blazor WebAssembly (`net10.0`) | The web version; the engine runs in a Web Worker |
 | `Connect4.Tools` | Console app (`net10.0`) | `book generate` and `book verify` (chapter 11), `endgame measure` (chapter 09) |
-| `Connect4.Engine.Tests` | xUnit | Engine tests, including Pascal Pons' test positions |
-| `Connect4.App.Tests` | xUnit (`net10.0-windows`) | View model tests with fake services |
+| `Connect4.Engine.Tests` | xUnit | Engine tests, including Pascal Pons' test positions (173 passing tests) |
+| `Connect4.App.Tests` | xUnit (`net10.0-windows`) | View model tests with fake services (53 passing tests; 226 total passing tests across the solution) |
 
 ```mermaid
 flowchart LR
@@ -72,7 +72,7 @@ flowchart LR
 - **One search at a time.** `SearchEngine` is not thread-safe; the app never starts a second search before the first has stopped.
 - **No allocations in the search.** Move lists are `MoveSorter` structs on the stack.
 - **Repeatable.** For the same position, limits, hash table contents and random seed the result is always the same; the tests seed the random generator.
-- **Tested against independent code.** The bitboards are checked against a slow grid board (`ReferenceBoard` in the tests), the solver against Pascal Pons' test positions with known exact scores.
+- **Tested against independent code.** The bitboards are checked against a slow grid board (`ReferenceBoard` in the tests), the solver against Pascal Pons' test positions with known exact scores. The automated regression test suite comprises **173 Engine tests** and **53 App tests** (**226 passing tests** in total).
 
 ---
 
