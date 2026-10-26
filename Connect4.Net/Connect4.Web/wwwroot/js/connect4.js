@@ -23,6 +23,17 @@ window.connect4 = (() => {
                     }
                     return;
                 }
+                // F2 opens Settings; Escape closes an open menu or the mobile drawer (dialogs handle their own Escape).
+                if ((e.key === 'F2' || e.key === 'Escape') && !e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) {
+                    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) {
+                        return;
+                    }
+                    if (e.key === 'F2') {
+                        e.preventDefault();
+                    }
+                    dotnet.invokeMethodAsync('OnShortcut', e.key.toLowerCase());
+                    return;
+                }
                 if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey || e.key.length !== 1) {
                     return;
                 }
@@ -40,6 +51,13 @@ window.connect4 = (() => {
             if (keydown) {
                 document.removeEventListener('keydown', keydown);
                 keydown = null;
+            }
+        },
+
+        // Keeps the newest move in view by scrolling only the history list, never the page.
+        scrollHistoryToEnd(list) {
+            if (list) {
+                list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
             }
         },
 
@@ -143,7 +161,7 @@ window.connect4 = (() => {
             }
             const boardRect = boardArea.getBoundingClientRect();
             let itemsWidth = 0;
-            menubar.querySelectorAll('.menu').forEach(m => itemsWidth += m.offsetWidth);
+            menubar.querySelectorAll('.desktop-menu-bar .menu').forEach(m => itemsWidth += m.offsetWidth);
             const maxLeft = Math.max(0, window.innerWidth - itemsWidth);
             const left = Math.min(Math.max(0, Math.round(boardRect.left)), maxLeft);
             document.documentElement.style.setProperty('--menu-left', `${left}px`);

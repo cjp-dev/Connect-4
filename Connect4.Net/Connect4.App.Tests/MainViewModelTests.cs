@@ -498,6 +498,6 @@ public sealed class MainViewModelTests
         Assert.Equal(1, item.Round);
         Assert.Equal("4", item.RedMove);
         Assert.NotEmpty(item.YellowMove);
-        Assert.Equal("1 move", vm.MoveCountText);
+        Assert.Equal("2 moves", vm.MoveCountText);
     }
 }

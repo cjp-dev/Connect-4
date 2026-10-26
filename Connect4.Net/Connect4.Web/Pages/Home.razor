@@ -186,7 +186,7 @@
             <!-- Move History Panel -->
             <section class="panel history-panel" aria-label="Move History">
                 <h2>MOVE HISTORY (@Vm.MoveCountText)</h2>
-                <div class="history-list">
+                <div class="history-list" @ref="_historyList">
                     @if (Vm.MoveHistoryList.Count == 0)
                     {
                         <p class="history-empty">No moves played yet.</p>
@@ -194,11 +194,18 @@
                     else
                     {
                         <ol>
-                            @foreach (var move in Vm.MoveHistoryList)
+                            @for (int i = 0; i < Vm.MoveHistoryList.Count; i++)
                             {
+                                var move = Vm.MoveHistoryList[i];
+                                bool lastRow = i == Vm.MoveHistoryList.Count - 1;
+                                bool yellowPlayed = !string.IsNullOrEmpty(move.YellowMove);
                                 <li>
                                     <span class="move-num">@(move.Round).</span>
-                                    <span class="move-notation">@move.Notation</span>
+                                    <span class="move-ply @(lastRow && !yellowPlayed ? "latest" : null)">@move.RedMove</span>
+                                    @if (yellowPlayed)
+                                    {
+                                        <span class="move-ply @(lastRow ? "latest" : null)">@move.YellowMove</span>
+                                    }
                                 </li>
                             }
                         </ol>
@@ -217,6 +224,8 @@
     private DotNetObjectReference<Home>? _self;
     private Appearance _appearance = Appearance.Default;
     private bool _renderPending;
+    private ElementReference _historyList;
+    private int _scrolledHistoryRows;
 
     protected override void OnInitialized()
     {
@@ -237,7 +246,7 @@
                 new("vs Computer (Yellow)", new AsyncRelayCommand(() => Vm.StartNewGameWithMode(GameMode.ComputerVsHuman)), IsChecked: () => Vm.IsComputerVsHuman, Radio: true),
                 new("vs Human (Two players)", new AsyncRelayCommand(() => Vm.StartNewGameWithMode(GameMode.HumanVsHuman)), IsChecked: () => Vm.IsHumanVsHuman, Radio: true),
                 new("Switch sides", Vm.SwitchSidesCommand, SeparatorBefore: true),
-                new("Settings...", Vm.EditSettingsCommand, SeparatorBefore: true),
+                new("Settings...", Vm.EditSettingsCommand, "F2", SeparatorBefore: true),
             ]),
             new("Options",
             [
@@ -278,6 +287,13 @@
         {
             _self = DotNetObjectReference.Create(this);
             await JS.InvokeVoidAsync("connect4.registerShortcuts", _self);
+            await JS.InvokeVoidAsync("connect4.initMenuAlignment");
+        }
+
+        if (Vm.MoveHistoryList.Count != _scrolledHistoryRows)
+        {
+            _scrolledHistoryRows = Vm.MoveHistoryList.Count;
+            await JS.InvokeVoidAsync("connect4.scrollHistoryToEnd", _historyList);
         }
     }
 
@@ -298,6 +314,7 @@
         if (_self is not null)
         {
             ((IJSInProcessRuntime)JS).InvokeVoid("connect4.unregisterShortcuts");
+            ((IJSInProcessRuntime)JS).InvokeVoid("connect4.cleanupMenuAlignment");
             _self.Dispose();
         }
     }
@@ -314,6 +331,8 @@
         "a" => RunAsync(Vm.ToggleAnalysisCommand),
         "f1" => RunUserGuide(),
         "shift+f1" => RunDocs(),
+        "f2" => RunAsync(Vm.EditSettingsCommand),
+        "escape" => CloseMenus(),
         _ => Task.CompletedTask,
     };
 
@@ -361,6 +380,14 @@
         _appearance = change(_appearance);
         AppearanceStore.Save(_appearance);
     });
+
+    private Task CloseMenus()
+    {
+        _openMenu = null;
+        _mobileDrawerOpen = false;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
 
     private void ToggleMenu(MenuDefinition menu) => _openMenu = _openMenu == menu ? null : menu;
 

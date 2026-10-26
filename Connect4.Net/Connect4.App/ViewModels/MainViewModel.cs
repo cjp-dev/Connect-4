@@ -748,8 +748,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
             MoveHistoryList.Add(new MoveHistoryItem(round, notation, red, yellow));
         }
 
-        int fullRounds = moves.Count / 2;
-        MoveCountText = moves.Count == 1 ? "1 ply" : fullRounds == 1 ? "1 move" : $"{fullRounds} moves";
+        // Counts individual moves (both players), the same in all four games.
+        MoveCountText = moves.Count == 1 ? "1 move" : $"{moves.Count} moves";
     }
 
     private void OnClockTimerTick(object? state)
