@@ -36,7 +36,7 @@
 | **Ply** | One move by one side. |
 | **Principal variation (PV)** | The expected line of play, read from the hash table; shown as "Line". |
 | **PVS** | Principal variation search: the first move with the full window, the others with a null window first. |
-| **Soft limit** | The time after which no new depth is started (chapter 10). |
+| **Soft limit** | The time after which no new depth is started; when the endgame solver follows, the running depth is also abandoned there (chapter 10). |
 | **Stacked threats** | Two threats of the same player on top of each other in one column. |
 | **Strong solve** | A solve that finds the exact score, including how many moves the win or loss takes (chapter 09). |
 | **Threat** | An empty cell where a player's disc would complete a four. |

@@ -16,21 +16,21 @@ This chapter documents the visual layout, menu commands, settings configuration,
 
 ```mermaid
 graph TD
-    subgraph UI Layout
-        MenuBar["Menu Bar &amp; Mobile Drawer<br/>File • Game • Options • Help"]
+    MenuBar["Menu Bar &amp; Mobile Drawer<br/>File • Game • Options • Help"]
+    Board["Interactive 7x6 Gravity Board Canvas<br/>7 Columns • Disc Drop Animation • Hover Previews • Winning Ring • Last Move Dot"]
+    subgraph Side["Side panels: right of the board (below it on narrow or portrait screens)"]
         StatusPanel["Status Header &amp; Turn Banner<br/>STATUS (Crimson when modified) • Variant Badge • Thinking Limits • Turn Banner"]
         Scoreboard["Dual-Card Player Scoreboard<br/>4 Layers: Swatch/Name/Clock • Role • Discs Placed Count • Discs in Reserve"]
         QuickActions["Quick Action Bar<br/>[Undo] • [Redo] • [Move Now]"]
-        Board["Interactive 7x6 Gravity Board Canvas<br/>7 Columns • Disc Drop Animation • Hover Previews • Winning Ring • Last Move Dot"]
         Analysis["Real-Time AI Analysis Panel<br/>Move • Depth • Score • Best Move • Nodes • Speed • Time"]
-        History["Move History Card<br/>Rounds • Red Moves • Yellow Moves • Auto-Scroll"]
+        History["Move History Card<br/>Rounds • Red Moves • Yellow Moves • Latest Highlighted • Auto-Scroll"]
     end
 
+    MenuBar --> Board
     MenuBar --> StatusPanel
     StatusPanel --> Scoreboard
     Scoreboard --> QuickActions
-    QuickActions --> Board
-    Board --> Analysis
+    QuickActions --> Analysis
     Analysis --> History
 ```
 
@@ -70,7 +70,7 @@ The application header features a standardized 4-menu hierarchy providing struct
 * *(Separator)*
 * **Switch sides:** Allows the human player to swap colors with the computer mid-match during their turn. The game state and move history are preserved, the match is marked modified (`IsGameModified = true`), and the computer immediately begins thinking if it becomes its turn.
 * *(Separator)*
-* **Settings...:** Opens the modal Game Settings dialog to configure engine thinking limits, endgame solver threshold, and opening book usage.
+* **Settings... (`F2` in the web version):** Opens the modal Game Settings dialog to configure engine thinking limits, endgame solver threshold, and opening book usage.
 
 ### 3. Options Menu
 * **Analysis (`Ctrl+A`):** Toggles the visibility of the real-time AI search analysis side panel.
@@ -89,11 +89,10 @@ The application header features a standardized 4-menu hierarchy providing struct
 ### 4. Help Menu
 * **User guide (`F1`):** Opens this chapter directly, providing immediate access to interface instructions, settings explanations, and shortcut tables.
 * **Rules & Documentation (`Shift+F1`):** Opens the complete Connect 4 Brain Architecture and Rules manual (`/docs` in the web client).
-* *(Separator)*
 * **About Connect 4...:** Displays engine version, author credits (Claus Pedersen), and architectural background.
 
 ### Responsive Mobile Navigation Drawer ($\le 768\text{px}$)
-On mobile devices and narrow viewports ($\le 768\text{px}$), the horizontal desktop menu bar transforms into a compact header featuring the application brand (`Connect 4`) and a hamburger button (`☰`). Tapping the hamburger slides out an off-canvas navigation drawer (`.mobile-drawer`) with a dimmed backdrop overlay, grouping File, Game, Options, and Help actions into touch-friendly tap targets ($\ge 44\text{px}$).
+On mobile devices and narrow viewports ($\le 768\text{px}$), the horizontal desktop menu bar transforms into a compact header featuring the application brand (`Connect 4`) and a hamburger button (`☰`). Tapping the hamburger slides out an off-canvas navigation drawer (`.mobile-drawer`) with a dimmed backdrop overlay, grouping File, Game, Options, and Help actions into touch-friendly tap targets ($\ge 44\text{px}$). The drawer opens from the right; `Escape` or the ✕ button closes it.
 
 ---
 
@@ -169,7 +168,7 @@ graph TD
 
 ### 1. Computer Thinking Limits (Three Modes)
 * **Fixed Depth ($1\dots 20$ plies):** Constant deterministic search depth. The computer evaluates all variations up to the specified ply count regardless of time taken.
-* **Time per Move ($1\dots 60$ seconds):** Constant thinking budget per turn. The engine uses soft limits ($2/3$ time) to conclude iterations safely before hard timeout interrupts.
+* **Time per Move ($1\dots 60$ seconds):** Constant thinking budget per turn. The engine uses soft limits ($2/3$ time) to conclude iterations safely before hard timeout interrupts; when the endgame solver will run, the search stops at the soft limit so the solver gets the last third.
 * **Time per Game ($1\dots 60$ minutes):** Total match chess clock bank. The engine dynamically calculates move time based on remaining clock time and game phase.
 
 ### 2. Endgame Solver Threshold
@@ -226,16 +225,16 @@ The move history panel gives players a readable transcript of the match, groupin
 
 ```
 ┌─────────────────────────────────┐
-│ MOVE HISTORY (3 moves)          │
+│ MOVE HISTORY (5 moves)          │
 ├─────────────────────────────────┤
 │ 1. 4    4                       │
 │ 2. 4    3                       │
-│ 3. 5    (thinking...)           │
+│ 3. 5                            │
 └─────────────────────────────────┘
 ```
 
-* **Round Numbering:** Numbered sequentially (`1.`, `2.`, `3.`), with Red's column in column 1 and Yellow's column in column 2.
-* **Auto-Scroll:** As new moves are committed, the list container automatically scrolls its viewport to the latest move row.
+* **Round Numbering:** Each row is one round: the round number (`1.`, `2.`, `3.`), Red's column, then Yellow's column. The header counts the individual moves of both players (`1 move`, `5 moves`).
+* **Latest move & Auto-Scroll:** The newest move is highlighted, and the list scrolls itself to keep it in view.
 
 ---
 
@@ -245,14 +244,17 @@ The move history panel gives players a readable transcript of the match, groupin
 |---|---|---|
 | `F1` | Global | Open **User guide** (this chapter) |
 | `Shift+F1` | Global | Open **Rules & Documentation** (architectural manual) |
+| `F2` | Global (web) | Open the **Settings** dialog |
+| `Ctrl+N` | Global | **New Game** (asks before abandoning a game in progress) |
 | `Ctrl+O` | Global | Open saved game record (`.txt`) |
 | `Ctrl+S` | Global | Save current match record |
 | `Ctrl+A` | Global | Toggle **AI Analysis Panel** visibility |
 | `Ctrl+M` | Engine | **Move Now:** Stop AI calculation and play best candidate |
 | `Ctrl+Z` | Board | **Undo** last move (refunds chess clock time) |
 | `Ctrl+Y` | Board | **Redo** previously undone move |
+| `Escape` | Menus (web) | Close an open menu or the mobile drawer |
 
-*(Note: Settings dialog is accessed via menu **Game $\rightarrow$ Settings...**; Undo/Redo are available via Quick Action buttons and `Ctrl+Z`/`Ctrl+Y`).*
+*(Note: Settings is also in the menu **Game $\rightarrow$ Settings...**; Undo/Redo are available via Quick Action buttons and `Ctrl+Z`/`Ctrl+Y`).*
 
 ---
 

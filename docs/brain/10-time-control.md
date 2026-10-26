@@ -42,10 +42,10 @@ flowchart LR
     Start["0.0 s<br/>Move starts"] --> Search["Heuristic Search<br/>Depth 1, 2, 3, ..."]
     Search --> Soft["3.33 s (Soft limit: 2/3)<br/>Current depth abandoned"]
     Soft --> Solver["Endgame Solver<br/>(if empty &le; 30)"]
-    Solver --> Hard["5.0 s (Hard limit)<br/>Hard timeout stops search"]
+    Solver --> Hard["5.0 s (Hard limit)<br/>Solver stopped if not finished"]
 ```
 
-The depth that is running at the soft limit may finish or be abandoned at the hard limit; the solver gets what is left, at most the last third.
+Without the solver, the depth that is running at the soft limit may finish, or be abandoned at the hard limit. With the solver, as here, it is abandoned at the soft limit, so the solver always gets the last third (1.67 s).
 
 ## Move Now and stopping
 

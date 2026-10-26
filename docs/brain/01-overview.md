@@ -13,7 +13,7 @@ The solution [Connect4.Net.slnx](../../Connect4.Net/Connect4.Net.slnx) has five 
 | `Connect4.Engine` | Class library (`net10.0`) | Board, rules, game record, evaluation, search, endgame solver, opening book |
 | `Connect4.App` | Class library (`net10.0`) | View models (CommunityToolkit.Mvvm), settings, service interfaces, generated sounds |
 | `Connect4.WPF` | WPF app (`net10.0-windows`) | The desktop window, dialogs and services |
-| `Connect4.Web` | Blazor WebAssembly (`net10.0`) | The web version; the engine runs in a Web Worker |
+| `Connect4.Web` | Blazor WebAssembly (`net10.0`) | The web version; the engine runs in a Web Worker, and the GUI frame comes from the shared GameShell library (git submodule `external/GameShell`, chapter 12) |
 | `Connect4.Tools` | Console app (`net10.0`) | `book generate` and `book verify` (chapter 11), `endgame measure` (chapter 09) |
 | `Connect4.Engine.Tests` | xUnit | Engine tests, including Pascal Pons' test positions (173 passing tests) |
 | `Connect4.App.Tests` | xUnit (`net10.0-windows`) | View model tests with fake services (53 passing tests; 226 total passing tests across the solution) |
@@ -24,6 +24,7 @@ flowchart LR
     Web["Connect4.Web"] --> App
     WPF --> Engine["Connect4.Engine"]
     Web --> Engine
+    Web --> Shell["GameShell<br/>(external/GameShell)"]
     App --> Engine
     Tools["Connect4.Tools"] --> Engine
 ```

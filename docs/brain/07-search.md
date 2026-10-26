@@ -73,7 +73,7 @@ Negamax writes the same with every score from the side to move, so each level ne
 
 `Negamax(position, depth, alpha, beta)` is fail-soft; the child is searched with the window (−β, −α):
 
-1. Count the node; every 1 024 nodes check cancellation, Move Now and the hard time limit.
+1. Count the node; every 1 024 nodes check cancellation, Move Now and the hard time limit (in the time modes the soft limit when the endgame solver follows, chapter 10).
 2. If the side to move can win at once: return $\text{Win} - (\text{Moves} + 1)$.
 3. `NonLosingMoves()`; if there is none, the opponent wins next move: return $-(\text{Win} - (\text{Moves} + 2))$.
 4. With 40 or more discs and a non-losing move, the game is a draw: return 0.

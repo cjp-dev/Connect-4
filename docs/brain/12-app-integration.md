@@ -25,6 +25,8 @@ flowchart TD
     Services --> Engine
 ```
 
+In the web app the page frame (menu bar, mobile drawer, keyboard shortcuts, status panel and player cards, analysis panel, move history), the dialog frame and the `/docs` viewer come from the shared Razor class library [GameShell](https://github.com/cjp-dev/GameShell) (git submodule `external/GameShell`; clone with `--recurse-submodules`). Connect 4 adds its menus, the board, the Settings form (`SettingsForm.razor`), `BrowserDialogService` (on top of GameShell's `ShellDialogs`) and `AnalysisAdapter` (shows `AnalysisViewModel` in GameShell's analysis panel).
+
 ## The game loop
 
 `MainViewModel` ([MainViewModel.cs](../../Connect4.Net/Connect4.App/ViewModels/MainViewModel.cs)):
@@ -81,7 +83,7 @@ sequenceDiagram
     W-->>JS: result JSON
     JS-->>Host: the call returns
     Host-->>VM: SearchResult
-    Note over VM,W: Move Now or Stop: signal via SharedArrayBuffer stops the worker cooperatively;<br/>fallback terminates and restarts if not answered within 300 ms.
+    Note over VM,W: Move Now or Stop: signal via SharedArrayBuffer stops the worker cooperatively.<br/>Fallback: terminate and restart it if not answered within 300 ms.
 ```
 
 ## The analysis panel

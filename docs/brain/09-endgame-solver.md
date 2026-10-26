@@ -4,7 +4,7 @@
 
 ## In short
 
-Near the end of the game the computer can work out the exact result. `EndgameSolver` ([EndgameSolver.cs](../../Connect4.Net/Connect4.Engine/Endgame/EndgameSolver.cs)) is Pascal Pons' C++ solver, ported 1:1 without its opening book. It searches to the end of the game with null-window alpha-beta and its own hash table. The heuristic search runs first and always gives a move; the solver is then tried with the time that is left.
+Near the end of the game the computer can work out the exact result. `EndgameSolver` ([EndgameSolver.cs](../../Connect4.Net/Connect4.Engine/Endgame/EndgameSolver.cs)) is Pascal Pons' C++ solver, ported 1:1 without its opening book. It searches to the end of the game with null-window alpha-beta and its own hash table. The heuristic search runs first and always gives a move; the solver is then tried with the rest of the time (in the time modes the last third, chapter 10).
 
 ## Scores
 
