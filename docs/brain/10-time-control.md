@@ -53,7 +53,7 @@ Without the solver, the depth that is running at the soft limit may finish, or b
 
 | Token | Effect |
 |---|---|
-| `moveNowToken` | Stop and return the best move found so far (Quick Action button, Ctrl+M, Game > Move Now) |
+| `moveNowToken` | Stop and return the best move found so far (Quick Action button, Ctrl+M, and Game > Move Now in the desktop app) |
 | `cancellationToken` | Stop and throw `OperationCanceledException` (New Game, Undo, Open, changing the mode, closing the window) |
 
 Both are checked with the hard limit every 1 024 nodes. In the browser the worker reads a stop signal from shared memory at each progress report (at least every 100 ms) and cancels the tokens itself; only if the page is not cross-origin isolated, or the worker does not answer within 300 ms, is the worker terminated (chapter 12).

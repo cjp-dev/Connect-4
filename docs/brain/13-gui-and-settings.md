@@ -55,7 +55,7 @@ Both desktop and web clients share a consistent palette designed for high contra
 
 ## Menu bar and navigation
 
-The application header features a standardized 4-menu hierarchy providing structured access to game lifecycle commands, modes, visual options, and documentation:
+The application header features a standardized 4-menu hierarchy providing structured access to game lifecycle commands, modes, visual options, and documentation. The menus below are those of the web app; the [desktop app's menus](#desktop-wpf-menus) differ a little:
 
 ### 1. File Menu
 * **New Game (`Ctrl+N`):** Starts a new game session. If a match is actively underway, a confirmation prompt prevents accidental loss of progress (*"Abandon current match and start a new game?"*). Resets clocks, clears undo/redo history, and sets Red for the opening move.
@@ -84,12 +84,15 @@ The application header features a standardized 4-menu hierarchy providing struct
 * **Animate Drops:** Toggles accelerating physical gravity drop animations when placing discs.
 
 > [!NOTE] Dedicated Quick Action Buttons for Undo & Redo
-> Undo and Redo are intentionally omitted from the top menu dropdowns. To optimize ergonomics and eliminate menu clutter, Undo and Redo are provided prominently as **Quick Action buttons** beneath the scoreboard and via standard keyboard shortcuts (`Ctrl+Z` / `Ctrl+Y`).
+> In the web app, Undo and Redo are intentionally omitted from the top menu dropdowns (the desktop app has them in its Moves menu). To optimize ergonomics and eliminate menu clutter, Undo and Redo are provided prominently as **Quick Action buttons** beneath the scoreboard and via standard keyboard shortcuts (`Ctrl+Z` / `Ctrl+Y`).
 
 ### 4. Help Menu
 * **User guide (`F1`):** Opens this chapter directly, providing immediate access to interface instructions, settings explanations, and shortcut tables.
 * **Rules & Documentation (`Shift+F1`):** Opens the complete Connect 4 Brain Architecture and Rules manual (`/docs` in the web client).
 * **About Connect 4...:** Displays engine version, author credits (Claus Pedersen), and architectural background.
+
+### Desktop (WPF) menus
+The desktop app has five menus: **File** (New Game, Open..., Save, Save As..., Exit), **Game** (the three game modes, Switch Sides, **Move Now** `Ctrl+M`, Settings...), **Moves** (Undo `Ctrl+Z`, Redo `Ctrl+Y`), **View** (Analysis `Ctrl+A`, Sound) and **Help** (User guide `F1`, Rules & Documentation `Shift+F1`, About Connect 4...). Settings has no `F2` shortcut there, and the board styles, 3D Discs and Animate Drops are only in the web app.
 
 ### Responsive Mobile Navigation Drawer ($\le 768\text{px}$)
 On mobile devices and narrow viewports ($\le 768\text{px}$), the horizontal desktop menu bar transforms into a compact header featuring the application brand (`Connect 4`) and a hamburger button (`☰`). Tapping the hamburger slides out an off-canvas navigation drawer (`.mobile-drawer`) with a dimmed backdrop overlay, grouping File, Game, Options, and Help actions into touch-friendly tap targets ($\ge 44\text{px}$). The drawer opens from the right; `Escape` or the ✕ button closes it.
