@@ -1,7 +1,7 @@
 // Browser helpers called from .NET through JS interop.
 window.connect4 = (() => {
     const maxFileSize = 1_000_000;
-    const shortcutKeys = 'osmzya';
+    const shortcutKeys = 'nosmzya';
     const sounds = new Map();
     let queue = Promise.resolve();
     let keydown = null;
