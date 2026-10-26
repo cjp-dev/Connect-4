@@ -190,14 +190,15 @@ public class SearchEngineTests
     [InlineData(0, false)]
     public void TimeModes_UseTheSolverOnlyWithinTheThreshold(int threshold, bool solves)
     {
-        // A draw early in the game: the heuristic search cannot prove it in the time, so only the solver can.
-        TestPosition test = TestPosition.Load("Test_L1_R2").First(t => t.Score == 0 && HasChoice(t));
-        Position position = Position.FromMoves(test.Moves);
+        // So early in the game the heuristic search cannot finish, however fast the machine, so it never makes the
+        // solver unnecessary. When the solver is allowed, the deepening stops at the soft limit and the solver
+        // always gets the rest of the time; the outcome does not depend on how fast the machine is.
+        Position position = Position.FromMoves("44");
         var progress = new ListProgress();
 
         SearchResult result = NewEngine().Search(
             position,
-            SearchLimits.TimePerMove(TimeSpan.FromMilliseconds(80)) with { EndgameThreshold = threshold },
+            SearchLimits.TimePerMove(TimeSpan.FromMilliseconds(300)) with { EndgameThreshold = threshold },
             progress);
 
         Assert.Equal(solves, progress.Items.Any(info => info.Solving));

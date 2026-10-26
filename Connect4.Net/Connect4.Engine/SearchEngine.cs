@@ -132,7 +132,6 @@ public sealed class SearchEngine
 
         int emptyCells = position.EmptyCells;
         TimeBudget budget = TimeControl.For(limits, emptyCells);
-        _hardLimitMs = budget.HardMs;
         bool timed = TimeControl.IsTimed(limits);
         bool useSolver = limits.Mode switch
         {
@@ -140,6 +139,10 @@ public sealed class SearchEngine
             TimeControlMode.FixedDepth => emptyCells <= limits.Depth,
             _ => emptyCells <= limits.EndgameThreshold,
         };
+
+        // When the solver follows, the deepening stops at the soft limit even in the middle of an iteration,
+        // so the solver always gets the rest of the time; otherwise a long last iteration could use it all.
+        _hardLimitMs = useSolver && timed ? budget.SoftMs : budget.HardMs;
         int maxDepth = limits.Mode switch
         {
             TimeControlMode.FixedDepth => useSolver ? Math.Min(limits.Depth, FallbackDepth) : limits.Depth,
@@ -164,6 +167,7 @@ public sealed class SearchEngine
             // Time is up or Move Now: keep the result of the last completed iteration.
         }
 
+        _hardLimitMs = budget.HardMs;
         if (useSolver && !best.Final && !_moveNow.IsCancellationRequested && _clock.ElapsedMilliseconds < _hardLimitMs)
         {
             best = SolveRoot(position, best, timed);
