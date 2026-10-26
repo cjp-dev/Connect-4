@@ -1,4 +1,4 @@
-/* Connect 4: the board, the player colours and the dialogs. The rest of the look comes from GameShell (gameshell.css). */
+/* Connect 4: the board, the player colours and the Settings form. The rest of the look comes from GameShell (gameshell.css). */
 
 /* Connect 4 Board */
 /* The board is 7 cells wide and 7 high (preview row and 6 rows) plus the numbers */
@@ -186,145 +186,7 @@
     border: 1px solid #f9a825;
 }
 
-/* Modal Dialogs (DialogHost) */
-.dialog-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 1rem;
-}
-
-.dialog {
-    background: #FFFFFF;
-    border-radius: 8px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    max-width: 480px;
-    padding: 1.5rem;
-    position: relative;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.dialog h2 {
-    margin: 0 0 0.75rem;
-    font-size: 1.15rem;
-    color: #1E293B;
-}
-
-.dialog-message {
-    white-space: pre-line;
-    color: #475569;
-    font-size: 0.95rem;
-    line-height: 1.5;
-}
-
-.dialog-heading {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #1E293B;
-}
-
-.dialog-with-picture {
-    display: grid;
-    grid-template-columns: 11rem minmax(0, 1fr);
-    column-gap: 1.25rem;
-    max-width: min(92vw, 40rem);
-}
-
-.dialog-with-picture h2, .dialog-with-picture .dialog-buttons {
-    grid-column: 1 / -1;
-}
-
-.dialog-picture {
-    margin: 0;
-}
-
-.dialog-picture img {
-    display: block;
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-    border: 1px solid #E2E8F0;
-    border-radius: 6px;
-}
-
-.dialog-picture figcaption {
-    margin-top: 0.5rem;
-    font-size: 0.8rem;
-    color: #64748B;
-}
-
-.dialog-body p {
-    margin: 0.6rem 0 0;
-    line-height: 1.45;
-    color: #475569;
-    font-size: 0.9rem;
-}
-
-.dialog-body p:first-child {
-    margin-top: 0;
-}
-
-@media (max-width: 520px) {
-    .dialog-with-picture {
-        grid-template-columns: 1fr;
-    }
-
-    .dialog-picture {
-        width: 9rem;
-        margin-bottom: 0.75rem;
-    }
-}
-
-.dialog-text {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 0.4rem 0.6rem;
-    border: 1px solid #CBD5E1;
-    border-radius: 4px;
-    font: inherit;
-    margin-top: 0.5rem;
-}
-
-.dialog-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    margin-top: 1.25rem;
-}
-
-.dialog-buttons button {
-    min-width: 5rem;
-    padding: 0.45rem 1rem;
-    border-radius: 5px;
-    border: 1px solid #CBD5E1;
-    background: #FFFFFF;
-    color: #2C3E50;
-    font-weight: 500;
-    cursor: pointer;
-}
-
-.dialog-buttons button:hover {
-    background: #F1F5F9;
-}
-
-.dialog-buttons button.default {
-    background: #3498DB;
-    border-color: #3498DB;
-    color: #FFFFFF;
-    font-weight: 600;
-}
-
-.dialog-buttons button.default:hover {
-    background: #2980B9;
-}
-
+/* Connect 4's Settings form is a grid: label, slider, value on each row */
 .settings {
     display: grid;
     grid-template-columns: auto 12rem 6rem;
@@ -332,13 +194,10 @@
     align-items: center;
     margin: 0.5rem 0;
     padding: 0.75rem;
-    border: 1px solid #E2E8F0;
-    border-radius: 6px;
     background: #F8FAFC;
 }
 
 .settings legend {
-    font-weight: 600;
     color: #2C3E50;
     font-size: 0.9rem;
     padding: 0 0.35rem;
@@ -346,13 +205,19 @@
 
 .settings label {
     font-size: 0.88rem;
+    font-weight: 400;
     color: #334155;
+    margin-top: 0;
 }
 
 .settings span {
-    font-size: 0.85rem;
+    font-weight: 400;
     color: #64748B;
-    font-variant-numeric: tabular-nums;
+}
+
+.settings input[type="range"] {
+    width: auto;
+    margin: 0;
 }
 
 .settings-note {

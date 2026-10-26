@@ -1,0 +1,45 @@
+@using Connect4.App.ViewModels
+
+@* Connect 4's Settings form, shown in GameShell's dialog (DialogRequest.Body). *@
+<fieldset class="settings">
+    <legend>How long may the computer think?</legend>
+
+    <label><input type="radio" name="mode" checked="@Settings.IsFixedDepth" @onchange="() => { Settings.IsFixedDepth = true; }" /> Fixed depth</label>
+    <input type="range" min="1" max="@Settings.MaxDepth" aria-label="Depth" disabled="@(!Settings.IsFixedDepth)"
+           @bind="Settings.Depth" @bind:event="oninput" />
+    <span>@Settings.Depth plies</span>
+
+    <label><input type="radio" name="mode" checked="@Settings.IsTimePerMove" @onchange="() => { Settings.IsTimePerMove = true; }" /> Time per move</label>
+    <input type="range" min="1" max="@Settings.MaxSecondsPerMove" aria-label="Seconds per move" disabled="@(!Settings.IsTimePerMove)"
+           @bind="Settings.SecondsPerMove" @bind:event="oninput" />
+    <span>@Settings.SecondsPerMove seconds</span>
+
+    <label><input type="radio" name="mode" checked="@Settings.IsTimePerGame" @onchange="() => { Settings.IsTimePerGame = true; }" /> Time per game</label>
+    <input type="range" min="1" max="@Settings.MaxMinutesPerGame" aria-label="Minutes per game" disabled="@(!Settings.IsTimePerGame)"
+           @bind="Settings.MinutesPerGame" @bind:event="oninput" />
+    <span>@Settings.MinutesPerGame minutes</span>
+
+    <p class="settings-note">
+        With a time limit, try to solve the game exactly when this many cells or fewer are empty (0 = never).
+        With a fixed depth the depth is used.
+    </p>
+    <span>Endgame solver</span>
+    <input type="range" min="0" max="@Settings.MaxEndgameThreshold" aria-label="Endgame solver threshold"
+           @bind="Settings.EndgameThreshold" @bind:event="oninput" />
+    <span>@Settings.EndgameThreshold cells</span>
+
+    <label class="settings-book"><input type="checkbox" @bind="Settings.UseOpeningBook" /> Use opening book (plays the first 9 plies at once and perfectly)</label>
+</fieldset>
+
+@code {
+    [Parameter, EditorRequired]
+    public SettingsViewModel Settings { get; set; } = default!;
+
+    /// <summary>The form as a dialog body; as a component it re-renders itself while the user edits it.</summary>
+    public static RenderFragment For(SettingsViewModel settings) => builder =>
+    {
+        builder.OpenComponent<SettingsForm>(0);
+        builder.AddComponentParameter(1, nameof(Settings), settings);
+        builder.CloseComponent();
+    };
+}
