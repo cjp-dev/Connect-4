@@ -135,6 +135,49 @@ public sealed class MainViewModelTests
     }
 
     [Fact]
+    public async Task Play_InstantReply_WaitsForTheDelay()
+    {
+        MainViewModel vm = Create(engineDelayMs: 0);
+        vm.ComputerDelayMs = 400;
+
+        vm.PlayCommand.Execute(3);
+        await Task.Delay(150);
+        Assert.Equal(1, vm.Game.Ply);
+
+        await vm.Idle.WaitAsync(TimeSpan.FromSeconds(5));
+        Assert.Equal(2, vm.Game.Ply);
+    }
+
+    [Fact]
+    public async Task Play_SlowReply_IsPlayedWithoutTheDelay()
+    {
+        MainViewModel vm = Create(engineDelayMs: 1200);
+        vm.ComputerDelayMs = 1000;
+
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        vm.PlayCommand.Execute(3);
+        await vm.Idle.WaitAsync(TimeSpan.FromSeconds(5));
+
+        Assert.Equal(2, vm.Game.Ply);
+        Assert.True(clock.ElapsedMilliseconds < 1900, $"The search took longer than the delay, so no delay is added ({clock.ElapsedMilliseconds} ms).");
+    }
+
+    [Fact]
+    public async Task MoveNow_SkipsTheDelay()
+    {
+        MainViewModel vm = Create(engineDelayMs: 0);
+        vm.ComputerDelayMs = 10_000;
+
+        vm.PlayCommand.Execute(3);
+        await Task.Delay(100);
+        Assert.True(vm.IsThinking);
+
+        vm.MoveNowCommand.Execute(null);
+        await vm.Idle.WaitAsync(TimeSpan.FromSeconds(2));
+        Assert.Equal(2, vm.Game.Ply);
+    }
+
+    [Fact]
     public async Task MoveNow_ThePlayIsMadeAtOnce()
     {
         MainViewModel vm = Create(settings: SlowSettings);
@@ -392,10 +435,15 @@ public sealed class MainViewModelTests
         Assert.StartsWith("The settings could not be saved.", vm.Status);
     }
 
-    private MainViewModel Create(GameMode mode = GameMode.HumanVsComputer, GameSettings? settings = null, string? notice = null)
+    private MainViewModel Create(GameMode mode = GameMode.HumanVsComputer, GameSettings? settings = null, string? notice = null, int? engineDelayMs = null)
     {
         _store = new FakeSettingsStore(AppSettings.Default with { Game = settings ?? QuickSettings, Mode = mode });
-        var engine = new LocalEngineHost(new ComputerPlayer(new SearchEngine(hashLogSize: 16, endgameLogSize: 17, random: new Random(1))));
+        IEngineHost engine = new LocalEngineHost(new ComputerPlayer(new SearchEngine(hashLogSize: 16, endgameLogSize: 17, random: new Random(1))));
+        if (engineDelayMs is { } delayMs)
+        {
+            engine = new DelayedEngineHost(engine, delayMs);
+        }
+
         return new MainViewModel(engine, _dialogs, _files, _store, _sounds, notice);
     }
 

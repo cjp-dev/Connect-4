@@ -219,6 +219,12 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     /// <summary>Completes when the computer has moved and a human is to move or the game is over.</summary>
     internal Task Idle { get; private set; } = Task.CompletedTask;
 
+    /// <summary>
+    /// Minimum time in milliseconds before the computer plays, so instant moves (book moves, forced moves) feel natural.
+    /// Searches that take longer are not delayed. Tests can set it to 0.
+    /// </summary>
+    internal int ComputerDelayMs { get; set; } = 250;
+
     public bool IsRedActiveTurn => _game.ToMove == Player.Red && !_game.IsGameOver && !_timedOut;
     public bool IsYellowActiveTurn => _game.ToMove == Player.Yellow && !_game.IsGameOver && !_timedOut;
 
@@ -638,6 +644,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
                 [.. _game.PlayedMoves], limits, progress, cancel.Token, moveNow.Token);
 
             Analysis.Update(result, position, stopwatch.Elapsed);
+            await WaitForNaturalDelayAsync(stopwatch.Elapsed, cancel.Token, moveNow.Token);
             _game.Play(result.Column);
             PlayMoveSounds();
             return true;
@@ -651,6 +658,27 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
             _cancel = null;
             _moveNow = null;
             IsThinking = false;
+        }
+    }
+
+    // Instant moves (book moves, forced moves) wait until ComputerDelayMs has passed since the search started.
+    // Moves that took longer are played at once, and Move Now skips the wait.
+    private async Task WaitForNaturalDelayAsync(TimeSpan searchTime, CancellationToken cancel, CancellationToken moveNow)
+    {
+        int remainingMs = ComputerDelayMs - (int)searchTime.TotalMilliseconds;
+        if (remainingMs <= 0 || moveNow.IsCancellationRequested)
+        {
+            return;
+        }
+
+        using var delay = CancellationTokenSource.CreateLinkedTokenSource(cancel, moveNow);
+        try
+        {
+            await Task.Delay(remainingMs, delay.Token);
+        }
+        catch (OperationCanceledException) when (!cancel.IsCancellationRequested)
+        {
+            // Move Now: play the move at once
         }
     }
 

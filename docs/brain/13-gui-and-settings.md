@@ -215,6 +215,9 @@ When enabled via **Options $\rightarrow$ Analysis** (`Ctrl+A`), the telemetry si
 | **Speed** | Search throughput in nodes per second (`nps`), indicating engine efficiency. |
 | **Time** | Elapsed calculation duration in stopwatch format (`m\:ss\.f`, e.g. `0:01.8`). |
 
+### Natural Feel Delay ($250\text{ ms}$)
+Instant moves, such as opening-book moves and forced blocks, would otherwise appear the moment the human has moved. `MainViewModel` therefore plays a computer move no sooner than $250\text{ ms}$ (`ComputerDelayMs`) after the search started: a search that took $40\text{ ms}$ waits another $210\text{ ms}$, while a search that took longer than $250\text{ ms}$ is played at once. **Move Now** skips the wait. The Analysis panel shows the time of the search itself.
+
 ### Asynchronous Threading & Web Workers
 To guarantee that the UI never stutters or freezes during intense tree search:
 - **Desktop (WPF):** The engine executes on background thread-pool tasks via `LocalEngineHost`, reporting telemetry snapshots through `IProgress<SearchInfo>`.
