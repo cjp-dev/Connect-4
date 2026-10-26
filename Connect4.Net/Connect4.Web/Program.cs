@@ -5,6 +5,7 @@ using Connect4.App.Services;
 using Connect4.App.ViewModels;
 using Connect4.Web;
 using Connect4.Web.Services;
+using GameShell;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -17,7 +18,7 @@ builder.Services.AddSingleton<IDialogService>(services => services.GetRequiredSe
 builder.Services.AddSingleton<IGameFileService, BrowserGameFileService>();
 builder.Services.AddSingleton<ISettingsStore, LocalStorageSettingsStore>();
 builder.Services.AddSingleton<ISoundService, BrowserSoundService>();
-builder.Services.AddSingleton<BrainDocs>();
+builder.Services.AddBrainDocs("The Connect 4 brain", "Connect 4", "https://github.com/cjp-dev/Connect-4/blob/main/docs/brain/");
 builder.Services.AddSingleton<AppearanceStore>();
 builder.Services.AddSingleton<IEngineHost, WebEngineHost>();
 builder.Services.AddSingleton(services => new MainViewModel(
