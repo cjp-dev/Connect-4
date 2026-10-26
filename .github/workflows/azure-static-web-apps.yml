@@ -11,6 +11,9 @@ on:
       - 'Connect4.Net/Images/**'
       - 'Test positions/**'
       - 'docs/brain/**'
+      - 'external/GameShell'
+      - 'external/GameShell/**'
+      - '.gitmodules'
       - '.github/workflows/azure-static-web-apps.yml'
   workflow_dispatch:
 
@@ -21,7 +24,10 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
+      # The shared GUI (GameShell) is a git submodule.
       - uses: actions/checkout@v7
+        with:
+          submodules: true
 
       - uses: actions/setup-dotnet@v6
         with:

@@ -13,7 +13,7 @@ public sealed class BrowserGameFileService(IJSRuntime js, BrowserDialogService d
         string[]? file;
         try
         {
-            file = await js.InvokeAsync<string[]?>("connect4.openTextFile", DefaultExtension);
+            file = await js.InvokeAsync<string[]?>("gameShell.openTextFile", DefaultExtension);
         }
         catch (JSException exception)
         {
@@ -40,7 +40,7 @@ public sealed class BrowserGameFileService(IJSRuntime js, BrowserDialogService d
             }
         }
 
-        await js.InvokeVoidAsync("connect4.downloadTextFile", name, text);
+        await js.InvokeVoidAsync("gameShell.downloadTextFile", name, text);
         return name;
     }
 }

@@ -22,6 +22,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Connect4.App\Connect4.App.csproj" />
     <ProjectReference Include="..\Connect4.Engine\Connect4.Engine.csproj" />
+    <!-- The shared game GUI (git submodule). -->
+    <ProjectReference Include="..\..\external\GameShell\src\GameShell\GameShell.csproj" />
   </ItemGroup>
 
   <!-- The brain documentation is shown by the Docs pages; a linked file is not served by the dev server, so it is copied (git-ignored). -->
