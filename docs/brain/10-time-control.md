@@ -4,7 +4,7 @@
 
 ## In short
 
-How long the computer may think is set in the Settings dialog, with the same three modes as Stello. The search has a **soft** limit (do not start another depth) and a **hard** limit (stop at once and play the best move of the last finished depth). The endgame solver gets the time up to the hard limit.
+How long the computer may think is set in the Settings dialog, with the same three modes as Stello. The search has a **soft** limit (do not start another depth) and a **hard** limit (stop at once and play the best move of the last finished depth). When the endgame solver follows, the heuristic search already stops at the soft limit and the solver gets the time up to the hard limit.
 
 ## The limits
 
@@ -33,16 +33,15 @@ In time-per-game mode the computer makes at most half of the remaining moves, so
 
 - After each depth the search stops if the soft limit has passed, because the next depth would take longer than the time left.
 - The hard limit is checked every 1 024 nodes. When it is reached, the running depth is abandoned and the result of the last finished depth is used.
-- The endgame solver gets the time up to the hard limit; if it does not finish, the heuristic move is played.
+- When the endgame solver follows (enough cells are empty, chapter 09), the heuristic search treats the soft limit as its hard limit: the running depth is abandoned there, so the solver always gets the last third of the time, up to the hard limit. If it does not finish, the heuristic move is played.
 
 One move with 5 seconds per move, when few enough cells are empty for the solver:
 
 ```mermaid
 flowchart LR
     Start["0.0 s<br/>Move starts"] --> Search["Heuristic Search<br/>Depth 1, 2, 3, ..."]
-    Search --> Soft["3.33 s (Soft limit: 2/3)<br/>No new depth started"]
-    Soft --> LastDepth["Finishing current depth<br/>(e.g. to 3.6 s)"]
-    LastDepth --> Solver["Endgame Solver<br/>(if empty &le; 30)"]
+    Search --> Soft["3.33 s (Soft limit: 2/3)<br/>Current depth abandoned"]
+    Soft --> Solver["Endgame Solver<br/>(if empty &le; 30)"]
     Solver --> Hard["5.0 s (Hard limit)<br/>Hard timeout stops search"]
 ```
 

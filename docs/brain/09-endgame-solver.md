@@ -66,17 +66,17 @@ It is created the first time the solver runs and kept for the whole session: its
 
 | Time mode | The solver runs when | Its time |
 |---|---|---|
-| Seconds per move, minutes per game | The empty cells are at most the **endgame threshold** (setting, 0–42, default 30; 0 = never) and the hard time limit is not reached | Until the hard limit |
+| Seconds per move, minutes per game | The empty cells are at most the **endgame threshold** (setting, 0–42, default 30; 0 = never) | From the soft limit to the hard limit |
 | Fixed depth | The empty cells are at most the depth setting | No limit; only Move Now stops it |
 | `Solve` (tests) | Always | No limit |
 
-The heuristic search runs first. In fixed-depth mode it is then limited to 8 plies, because it only has to give a move in case Move Now stops the solver. The solver is skipped when the heuristic search has already found a final result.
+The heuristic search runs first. In fixed-depth mode it is then limited to 8 plies, because it only has to give a move in case Move Now stops the solver. In the two time modes it stops at the soft limit, even in the middle of a depth, so the solver always gets the last third of the time; otherwise a long last depth could use the time up and the solver would never start. The solver is skipped when the heuristic search has already found a final result.
 
 If the solver runs out of time or Move Now is pressed, it throws `OperationCanceledException`, and the move of the heuristic search is played. The time limit is checked with a clock every 1 024 nodes, not with a timer: in the browser the engine runs in a Web Worker, where a timer cannot fire while the search runs. The 1 024-node check also invokes an internal heartbeat hook, allowing the engine to report progress and poll the stop signal at least every 100 ms during long endgame solves.
 
 ## Choosing the threshold
 
-The search stops starting new depths at 2/3 of the time for the move (chapter 10), so with the default 5 s per move the solver gets at most the last 1.7 s. `Connect4.Tools endgame measure` times the solve the engine does (every move, from an empty table) by number of empty cells:
+The heuristic search stops at 2/3 of the time for the move (chapter 10), so with the default 5 s per move the solver gets the last 1.7 s. `Connect4.Tools endgame measure` times the solve the engine does (every move, from an empty table) by number of empty cells:
 
 ```text
 Connect4.Tools endgame measure [--from 24] [--to 33] [--games 100] [--per-set 50] [--limit-ms 1700] [--cap 30] [--workers 1]
